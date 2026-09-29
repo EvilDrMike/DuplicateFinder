@@ -1,0 +1,4 @@
+[http]
+# The local Windows network blocks CRL/OCSP checks for crates.io's certificate chain.
+# Re-enable this when the network allows certificate revocation traffic.
+check-revoke = false
