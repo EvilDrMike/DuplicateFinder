@@ -1,0 +1,312 @@
+/* Amiga theme: Workbench 2.0 palette; !important beats classic colours. */
+:root[data-theme="amiga"] {
+  --amiga-grey: #aaaaaa;
+  --amiga-black: #000;
+  --amiga-white: #fff;
+  --amiga-blue: #6688bb;
+  color: var(--amiga-black);
+  background: var(--amiga-grey);
+}
+[data-theme="amiga"] body::before {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: block;
+  padding: 2px 10px;
+  border-bottom: 2px solid var(--amiga-black);
+  background: var(--amiga-white);
+  color: var(--amiga-black);
+  /* Gap after "Workbench Screen" reserves room for the Settings/About menu items */
+  content: "Workbench Screen                    DuplicateFinder.info    1,048,576 graphics mem  524,288 other mem";
+  font:
+    16px/20px "Topaz",
+    "VT323",
+    monospace;
+  white-space: pre;
+}
+[data-theme="amiga"] .app-shell,
+[data-theme="amiga"] .app-shell :where(*:not(.theme-swatch)) {
+  color: var(--amiga-black) !important;
+  background-color: transparent !important;
+  border-color: var(--amiga-black) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  font-family: "Topaz", "Share Tech Mono", "DM Mono", monospace !important;
+}
+[data-theme="amiga"] .app-shell *::placeholder {
+  color: #555 !important;
+}
+[data-theme="amiga"] .app-shell :focus-visible {
+  outline: 2px dotted var(--amiga-black) !important;
+  outline-offset: 2px;
+}
+[data-theme="amiga"] .app-shell input[type="checkbox"],
+[data-theme="amiga"] .app-shell input[type="radio"] {
+  accent-color: var(--amiga-blue);
+}
+[data-theme="amiga"] .app-shell h2,
+[data-theme="amiga"] .app-shell .brand,
+[data-theme="amiga"] .app-shell .summary-grid strong {
+  font-family: "Topaz", "VT323", monospace !important;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+[data-theme="amiga"] .app-shell h2 {
+  font-size: 34px;
+}
+[data-theme="amiga"] .app-shell .summary-grid strong {
+  font-size: 30px;
+}
+/* The main window */
+[data-theme="amiga"] .app-shell {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  padding-top: 0;
+  border: 2px solid !important;
+  border-color: var(--amiga-white) var(--amiga-black) var(--amiga-black)
+    var(--amiga-white) !important;
+  background-color: var(--amiga-grey) !important;
+}
+/* Active window title bar with close and depth gadgets */
+[data-theme="amiga"] .app-shell .topbar {
+  margin: 0 -42px 24px;
+  padding: 3px 4px;
+  border-bottom: 2px solid var(--amiga-black) !important;
+  background-color: var(--amiga-blue) !important;
+}
+[data-theme="amiga"] .topbar::before,
+[data-theme="amiga"] .topbar::after {
+  flex-shrink: 0;
+  width: 26px;
+  height: 20px;
+  border: 2px solid;
+  border-color: var(--amiga-white) var(--amiga-black) var(--amiga-black)
+    var(--amiga-white);
+  content: "";
+}
+[data-theme="amiga"] .topbar::before {
+  background:
+    linear-gradient(var(--amiga-white), var(--amiga-white)) center / 6px 6px
+      no-repeat,
+    var(--amiga-blue);
+  outline: 2px solid var(--amiga-black);
+  outline-offset: -6px;
+}
+[data-theme="amiga"] .topbar::after {
+  /* The menu items are fixed-positioned, so push the depth gadget right explicitly */
+  margin-left: auto;
+  background:
+    linear-gradient(var(--amiga-white), var(--amiga-white)) 11px 7px / 9px 7px
+      no-repeat,
+    linear-gradient(var(--amiga-black), var(--amiga-black)) 3px 2px / 11px 9px
+      no-repeat,
+    var(--amiga-blue);
+}
+[data-theme="amiga"] .app-shell .brand {
+  font-size: 20px;
+}
+[data-theme="amiga"] .app-shell .brand-mark {
+  display: none;
+}
+[data-theme="amiga"] .app-shell .topbar-actions {
+  position: fixed;
+  z-index: 6;
+  top: 2px;
+  left: calc(10px + 17ch);
+  gap: 2ch;
+  margin: 0;
+  font:
+    16px/20px "Topaz",
+    "VT323",
+    monospace !important;
+}
+[data-theme="amiga"] .app-shell .topbar-actions .about-button {
+  height: 20px;
+  padding: 0 0.5ch;
+  border: 0 !important;
+  background-color: var(--amiga-white) !important;
+  font:
+    16px/20px "Topaz",
+    "VT323",
+    monospace !important;
+  text-transform: none;
+}
+[data-theme="amiga"] .app-shell .topbar-actions .about-button:hover,
+[data-theme="amiga"] .app-shell .topbar-actions .about-button:focus-visible {
+  background-color: var(--amiga-black) !important;
+  color: var(--amiga-white) !important;
+}
+/* filter would make the fixed menu items position relative to the title bar */
+[data-theme="amiga"] .delete-all-mode .topbar.locked-region {
+  filter: none;
+}
+/* Raised panels and gadgets */
+[data-theme="amiga"] .app-shell .scan-panel,
+[data-theme="amiga"] .app-shell .summary-grid,
+[data-theme="amiga"] .app-shell .duplicate-group,
+[data-theme="amiga"] .app-shell .duplicate-folder,
+[data-theme="amiga"] .app-shell .preview-pane,
+[data-theme="amiga"] .app-shell .about-dialog,
+[data-theme="amiga"] .app-shell .theme-option,
+[data-theme="amiga"] .app-shell .scan-button,
+[data-theme="amiga"] .app-shell .browse-button,
+[data-theme="amiga"] .app-shell .clear-folders-button,
+[data-theme="amiga"] .app-shell .add-path-button,
+[data-theme="amiga"] .app-shell .filter-preset,
+[data-theme="amiga"] .app-shell .match-mode-control button,
+[data-theme="amiga"] .app-shell .move-source-control button,
+[data-theme="amiga"] .app-shell .results-tabs button,
+[data-theme="amiga"] .app-shell .delete-button,
+[data-theme="amiga"] .app-shell .pagination button,
+[data-theme="amiga"] .app-shell .keep-button,
+[data-theme="amiga"] .app-shell .reveal-button,
+[data-theme="amiga"] .app-shell .folder-reorder-controls button,
+[data-theme="amiga"] .app-shell .group-delete-button,
+[data-theme="amiga"] .app-shell .remove-folder,
+[data-theme="amiga"] .app-shell .preview-modal-close,
+[data-theme="amiga"] .app-shell .preview-modal-nav {
+  border: 2px solid !important;
+  border-color: var(--amiga-white) var(--amiga-black) var(--amiga-black)
+    var(--amiga-white) !important;
+  background-color: var(--amiga-grey) !important;
+}
+[data-theme="amiga"] .app-shell .summary-grid > div {
+  border-color: var(--amiga-black) !important;
+}
+[data-theme="amiga"] .app-shell .match-mode-control,
+[data-theme="amiga"] .app-shell .move-source-control {
+  gap: 4px;
+  border: 0;
+}
+[data-theme="amiga"] .app-shell .results-tabs {
+  gap: 6px;
+}
+[data-theme="amiga"] .app-shell .results-tabs button {
+  padding: 4px 12px;
+}
+[data-theme="amiga"] .app-shell .results-tabs button.active::after {
+  display: none;
+}
+/* Recessed string gadgets */
+[data-theme="amiga"] .app-shell .filter-input,
+[data-theme="amiga"] .app-shell .manual-folder-row,
+[data-theme="amiga"] .app-shell .folder-item,
+[data-theme="amiga"] .app-shell .path-field,
+[data-theme="amiga"] .app-shell .folder-empty,
+[data-theme="amiga"] .app-shell .move-destination-control input,
+[data-theme="amiga"] .app-shell .results-settings select,
+[data-theme="amiga"] .app-shell .group-toggle span,
+[data-theme="amiga"] .app-shell .preview-frame,
+[data-theme="amiga"] .app-shell .move-file-list {
+  border: 2px solid !important;
+  border-color: var(--amiga-black) var(--amiga-white) var(--amiga-white)
+    var(--amiga-black) !important;
+}
+[data-theme="amiga"] .app-shell .preview-frame {
+  background-color: var(--amiga-black) !important;
+}
+/* Selected gadgets: inverted bevel with blue fill */
+[data-theme="amiga"] .app-shell .scan-button:active:not(:disabled),
+[data-theme="amiga"] .app-shell button:active:not(:disabled),
+[data-theme="amiga"] .app-shell .filter-preset.active,
+[data-theme="amiga"] .app-shell .match-mode-control button.active,
+[data-theme="amiga"] .app-shell .move-source-control button.active,
+[data-theme="amiga"] .app-shell .results-tabs button.active,
+[data-theme="amiga"] .app-shell .keep-button.is-kept,
+[data-theme="amiga"] .app-shell .theme-option.active {
+  border-color: var(--amiga-black) var(--amiga-white) var(--amiga-white)
+    var(--amiga-black) !important;
+  background-color: var(--amiga-blue) !important;
+}
+[data-theme="amiga"] .app-shell .selected .group-toggle span,
+[data-theme="amiga"] .app-shell .duplicate-group.selected,
+[data-theme="amiga"] .app-shell .file-row.preview-selected {
+  background-color: var(--amiga-blue) !important;
+}
+[data-theme="amiga"] .app-shell .file-row:hover {
+  background-color: var(--amiga-white) !important;
+}
+[data-theme="amiga"] .app-shell .duplicate-group.selected .file-row:hover {
+  background-color: #88a4cc !important;
+}
+[data-theme="amiga"] .app-shell .eyebrow,
+[data-theme="amiga"] .app-shell .panel-label {
+  display: inline-block;
+  padding: 1px 6px;
+  background-color: var(--amiga-blue) !important;
+}
+[data-theme="amiga"] .app-shell .pulse {
+  background-color: var(--amiga-white) !important;
+  border: 1px solid var(--amiga-black);
+}
+[data-theme="amiga"] .app-shell .accent-stat {
+  background-color: var(--amiga-white) !important;
+}
+[data-theme="amiga"] .app-shell .file-path,
+[data-theme="amiga"] .app-shell .folder-name,
+[data-theme="amiga"] .app-shell .duplicate-folder-path {
+  color: var(--amiga-black) !important;
+}
+/* Destructive actions: white on black to stand apart within the four colours */
+[data-theme="amiga"] .app-shell .delete-all-warning,
+[data-theme="amiga"] .app-shell .move-error {
+  background-color: var(--amiga-black) !important;
+  color: var(--amiga-white) !important;
+}
+[data-theme="amiga"] .app-shell .delete-all-warning,
+[data-theme="amiga"] .app-shell .move-error {
+  display: inline-block;
+  padding: 2px 6px;
+}
+/* Workbench "ghosted" gadgets: dithered over the face with dimmed text */
+[data-theme="amiga"] .app-shell button:disabled {
+  background-image: repeating-conic-gradient(
+    var(--amiga-grey) 0 25%,
+    #8a8a8a 0 50%
+  ) !important;
+  background-size: 4px 4px !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+[data-theme="amiga"] .app-shell .duplicate-group.delete-all-selected {
+  border-color: var(--amiga-black) !important;
+  outline: 2px dashed var(--amiga-black);
+  outline-offset: -6px;
+}
+[data-theme="amiga"] .app-shell .about-backdrop {
+  background-color: rgba(170, 170, 170, 0.6) !important;
+}
+[data-theme="amiga"] .app-shell .about-dialog {
+  padding-top: 0;
+}
+[data-theme="amiga"] .app-shell .about-dialog-heading {
+  margin: 0 -28px;
+  padding: 4px 8px;
+  border-bottom: 2px solid var(--amiga-black) !important;
+  background-color: var(--amiga-blue) !important;
+}
+[data-theme="amiga"] .app-shell .about-dialog p,
+[data-theme="amiga"] .app-shell .about-dialog h2 em {
+  color: var(--amiga-black) !important;
+}
+[data-theme="amiga"] .app-shell .about-dialog-heading .eyebrow {
+  padding: 0;
+  background-color: transparent !important;
+}
+[data-theme="amiga"] .app-shell .preview-modal-caption {
+  border-top: 2px solid var(--amiga-black) !important;
+  background-color: var(--amiga-white) !important;
+}
+[data-theme="amiga"] .app-shell .preview-modal img {
+  border: 2px solid;
+  border-color: var(--amiga-white) var(--amiga-black) var(--amiga-black)
+    var(--amiga-white);
+  background-color: var(--amiga-grey) !important;
+}
+@media (max-width: 680px) {
+  [data-theme="amiga"] .app-shell .topbar {
+    margin: 0 -18px 20px;
+  }
+}

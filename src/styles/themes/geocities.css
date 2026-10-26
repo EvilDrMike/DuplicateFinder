@@ -1,0 +1,461 @@
+/* GeoCities theme: deliberately tacky, but content sits on solid panels to stay readable. */
+:root[data-theme="geocities"] {
+  --geo-navy: #000080;
+  --geo-magenta: #ff00ff;
+  --geo-lime: #00ff00;
+  --geo-cyan: #00ffff;
+  --geo-silver: #c0c0c0;
+  --geo-link: #0000ee;
+  --geo-visited: #551a8b;
+  --geo-rainbow: linear-gradient(
+    90deg,
+    #ff0000,
+    #ff6600,
+    #009900,
+    #0000ff,
+    #9900cc,
+    #ff0000
+  );
+  font-family: "Comic Sans MS", "Comic Neue", cursive;
+  color: #000;
+  background-color: #000033;
+  /* Tiled starfield */
+  background-image:
+    radial-gradient(#fff 1px, transparent 1.5px),
+    radial-gradient(#ffff66 1.2px, transparent 1.8px),
+    radial-gradient(#ff99ff 1px, transparent 1.5px);
+  background-size:
+    47px 47px,
+    83px 83px,
+    131px 131px;
+  background-position:
+    0 0,
+    20px 35px,
+    60px 10px;
+}
+[data-theme="geocities"] button,
+[data-theme="geocities"] select,
+[data-theme="geocities"] .eyebrow,
+[data-theme="geocities"] .panel-label,
+[data-theme="geocities"] .app-shell [class] {
+  font-family: "Comic Sans MS", "Comic Neue", cursive;
+}
+[data-theme="geocities"] .app-shell {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 8px ridge var(--geo-magenta);
+  background: #ffffcc;
+}
+[data-theme="geocities"] .app-shell::after {
+  display: block;
+  width: fit-content;
+  margin: 30px auto 0;
+  padding: 6px 12px;
+  border: 3px inset var(--geo-silver);
+  background: #000;
+  color: var(--geo-lime);
+  content: "You are visitor No. 0013370 ★ Sign my guestbook! ★ Best viewed in Netscape Navigator 4 at 800x600";
+  font:
+    bold 12px "Courier New",
+    monospace;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+[data-theme="geocities"] .topbar {
+  flex-wrap: wrap;
+  overflow: hidden;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+[data-theme="geocities"] .topbar::after {
+  flex-basis: 100%;
+  margin-top: 14px;
+  padding: 6px 0;
+  border-top: 10px solid transparent;
+  border-image: repeating-linear-gradient(45deg, #ffcc00 0 12px, #000 12px 24px)
+    10;
+  background: var(--geo-navy);
+  color: #ffff00;
+  content: "🚧 UNDER CONSTRUCTION 🚧  Welcome to my DuplicateFinder homepage!!!  🚧 UNDER CONSTRUCTION 🚧";
+  font-weight: 700;
+  white-space: nowrap;
+  animation: geo-marquee 16s linear infinite;
+}
+@keyframes geo-marquee {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+[data-theme="geocities"] .brand {
+  font-size: 20px;
+  color: var(--geo-magenta);
+  text-shadow: 2px 2px 0 #000;
+  animation: geo-cycle-bright 3s linear infinite;
+}
+[data-theme="geocities"] .brand::after {
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: #ff0000;
+  color: #fff;
+  content: "NEW!";
+  font-size: 11px;
+  text-shadow: none;
+  animation: geo-blink 1.4s steps(1) infinite;
+}
+@keyframes geo-blink {
+  50% {
+    opacity: 0;
+  }
+}
+[data-theme="geocities"] .brand-mark {
+  border: 3px outset var(--geo-silver);
+  background: var(--geo-rainbow);
+  background-size: 300% 100%;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  animation:
+    geo-spin 3s linear infinite,
+    geo-rainbow-scroll 2s linear infinite;
+}
+[data-theme="geocities"] h2 {
+  display: inline-block;
+  background: var(--geo-rainbow);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  letter-spacing: 0;
+  animation:
+    geo-rainbow-scroll 3s linear infinite,
+    geo-wobble 2.4s ease-in-out infinite;
+}
+[data-theme="geocities"] .eyebrow {
+  color: #ff0000;
+  font-weight: 700;
+  animation: geo-cycle-dark 2.5s linear infinite;
+}
+[data-theme="geocities"] .panel-label {
+  animation: geo-cycle-bright 2.5s linear infinite;
+}
+[data-theme="geocities"] .about-dialog h2 em {
+  color: #ff0000;
+  -webkit-text-fill-color: currentColor;
+  animation: geo-cycle-dark 2s linear infinite;
+}
+@keyframes geo-rainbow-scroll {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+@keyframes geo-wobble {
+  0%,
+  100% {
+    transform: rotate(-1.5deg) scale(1);
+  }
+  50% {
+    transform: rotate(1.5deg) scale(1.04);
+  }
+}
+@keyframes geo-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+/* Dark hues stay readable on the pale yellow page */
+@keyframes geo-cycle-dark {
+  0%,
+  100% {
+    color: #ff0000;
+  }
+  20% {
+    color: #cc00cc;
+  }
+  40% {
+    color: #0000ff;
+  }
+  60% {
+    color: #008800;
+  }
+  80% {
+    color: #ff6600;
+  }
+}
+/* Bright hues stay readable on navy or with the black drop shadow */
+@keyframes geo-cycle-bright {
+  0%,
+  100% {
+    color: #ff00ff;
+  }
+  20% {
+    color: #ffff00;
+  }
+  40% {
+    color: #00ff00;
+  }
+  60% {
+    color: #00ffff;
+  }
+  80% {
+    color: #ff9900;
+  }
+}
+/* Win95-style bevelled buttons */
+[data-theme="geocities"] .scan-button,
+[data-theme="geocities"] .browse-button,
+[data-theme="geocities"] .clear-folders-button,
+[data-theme="geocities"] .add-path-button,
+[data-theme="geocities"] .filter-preset,
+[data-theme="geocities"] .match-mode-control button,
+[data-theme="geocities"] .move-source-control button,
+[data-theme="geocities"] .delete-button,
+[data-theme="geocities"] .pagination button,
+[data-theme="geocities"] .keep-button,
+[data-theme="geocities"] .reveal-button,
+[data-theme="geocities"] .folder-reorder-controls button,
+[data-theme="geocities"] .about-button,
+[data-theme="geocities"] .results-tabs button {
+  border: 3px outset var(--geo-silver);
+  background: var(--geo-silver);
+  color: #000;
+  font-weight: 700;
+}
+[data-theme="geocities"] .about-button,
+[data-theme="geocities"] .results-tabs button {
+  padding: 4px 10px;
+}
+[data-theme="geocities"] .scan-button:active:not(:disabled),
+[data-theme="geocities"] .browse-button:active:not(:disabled),
+[data-theme="geocities"] .delete-button:active:not(:disabled),
+[data-theme="geocities"] .pagination button:active:not(:disabled),
+[data-theme="geocities"] .keep-button:active,
+[data-theme="geocities"] .filter-preset.active,
+[data-theme="geocities"] .match-mode-control button.active,
+[data-theme="geocities"] .move-source-control button.active,
+[data-theme="geocities"] .keep-button.is-kept {
+  border-style: inset;
+  background: var(--geo-lime);
+  color: #000;
+}
+[data-theme="geocities"] .scan-button {
+  background: #ffff00;
+  transform: none;
+}
+[data-theme="geocities"] .scan-button:hover:not(:disabled),
+[data-theme="geocities"] .browse-button:hover:not(:disabled),
+[data-theme="geocities"] .clear-folders-button:hover:not(:disabled),
+[data-theme="geocities"] .add-path-button:hover:not(:disabled),
+[data-theme="geocities"] .delete-button:not(:disabled):hover,
+[data-theme="geocities"] .pagination button:hover:not(:disabled),
+[data-theme="geocities"] .keep-button:hover,
+[data-theme="geocities"] .reveal-button:hover,
+[data-theme="geocities"] .about-button:hover,
+[data-theme="geocities"] .results-tabs button:hover {
+  border-color: var(--geo-silver);
+  background: var(--geo-cyan);
+  color: #000;
+  transform: none;
+}
+[data-theme="geocities"] .results-tabs {
+  gap: 4px;
+  border-bottom: 4px double var(--geo-navy);
+}
+[data-theme="geocities"] .results-tabs button.active {
+  background: var(--geo-navy);
+  color: #fff;
+}
+[data-theme="geocities"] .results-tabs button.active::after {
+  display: none;
+}
+[data-theme="geocities"] .scan-panel {
+  border: 5px ridge var(--geo-cyan);
+  background: var(--geo-navy);
+  color: #fff;
+}
+[data-theme="geocities"] .panel-label,
+[data-theme="geocities"] .scan-panel-toggle,
+[data-theme="geocities"] .scan-panel .folder-symbol,
+[data-theme="geocities"] .folder-icon {
+  color: var(--geo-lime);
+}
+[data-theme="geocities"] .pulse {
+  background: #ff0000;
+  box-shadow: 0 0 0 4px #ffff00;
+  animation: geo-blink 1s steps(1) infinite;
+}
+[data-theme="geocities"] .folder-picker-row div > span,
+[data-theme="geocities"] .folder-list-heading,
+[data-theme="geocities"] .filter-row > span,
+[data-theme="geocities"] .match-mode-row > div:first-child span,
+[data-theme="geocities"] .status {
+  color: var(--geo-cyan);
+}
+[data-theme="geocities"] .filter-input,
+[data-theme="geocities"] .manual-folder-row,
+[data-theme="geocities"] .folder-item,
+[data-theme="geocities"] .path-field,
+[data-theme="geocities"] .move-destination-control input {
+  border: 3px inset var(--geo-silver);
+  background: #fff;
+}
+[data-theme="geocities"] .scan-panel input,
+[data-theme="geocities"] .folder-name,
+[data-theme="geocities"] .move-destination-control input {
+  color: #000;
+}
+[data-theme="geocities"] .scan-panel input::placeholder {
+  color: #555;
+}
+[data-theme="geocities"] .remove-folder {
+  color: #ff0000;
+}
+[data-theme="geocities"] .summary-grid {
+  border: 3px outset var(--geo-silver);
+  background: var(--geo-silver);
+}
+[data-theme="geocities"] .summary-grid > div {
+  margin: 3px;
+  border: 2px inset var(--geo-silver);
+  background: #fff;
+}
+[data-theme="geocities"] .summary-grid strong {
+  color: var(--geo-link);
+  font-family: "Courier New", monospace;
+  letter-spacing: 0;
+}
+[data-theme="geocities"] .summary-grid .accent-stat {
+  background: #000;
+}
+[data-theme="geocities"] .summary-grid .accent-stat strong,
+[data-theme="geocities"] .summary-grid .accent-stat span,
+[data-theme="geocities"] .summary-grid .accent-stat small {
+  color: var(--geo-lime);
+}
+[data-theme="geocities"] .duplicate-group,
+[data-theme="geocities"] .duplicate-folder {
+  border: 3px dashed var(--geo-magenta);
+  background: #fff;
+}
+[data-theme="geocities"] .duplicate-group.selected {
+  border: 3px solid var(--geo-link);
+  background: #ccffff;
+}
+[data-theme="geocities"] .duplicate-group.delete-all-selected {
+  border: 3px solid #ff0000;
+  background: #ffcccc;
+}
+[data-theme="geocities"] .group-toggle {
+  border-right: 3px groove var(--geo-silver);
+}
+[data-theme="geocities"] .group-toggle span {
+  border: 2px inset var(--geo-silver);
+  background: #fff;
+  color: #000;
+}
+[data-theme="geocities"] .selected .group-toggle span {
+  border-color: var(--geo-silver);
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+}
+[data-theme="geocities"] .group-title strong {
+  color: var(--geo-navy);
+}
+[data-theme="geocities"] .file-type {
+  border: 2px outset var(--geo-silver);
+  background: #ffff00;
+  color: #000;
+  font-weight: 700;
+}
+[data-theme="geocities"] .file-row {
+  border-top: 1px dotted var(--geo-magenta);
+}
+[data-theme="geocities"] .file-path,
+[data-theme="geocities"] .duplicate-folder-path {
+  color: var(--geo-link);
+  text-decoration: underline;
+}
+[data-theme="geocities"] .file-row:hover {
+  background: #ffff99;
+}
+[data-theme="geocities"] .file-row.preview-selected {
+  background: #ffff00;
+}
+[data-theme="geocities"] .file-row.preview-selected .file-path {
+  color: var(--geo-visited);
+}
+[data-theme="geocities"] .preview-pane {
+  border: 5px ridge var(--geo-cyan);
+  background: #fff;
+}
+[data-theme="geocities"] .preview-heading {
+  background: var(--geo-navy);
+}
+[data-theme="geocities"] .preview-heading .eyebrow,
+[data-theme="geocities"] .preview-heading span {
+  color: #ffff00;
+}
+[data-theme="geocities"] .preview-frame {
+  background: repeating-conic-gradient(#e0e0e0 0 25%, #fff 0 50%) 0 0 / 16px
+    16px;
+}
+[data-theme="geocities"] .action-bar b {
+  color: #ff0000;
+}
+[data-theme="geocities"] .about-dialog {
+  border: 6px ridge var(--geo-magenta);
+  background: #ffffcc;
+}
+[data-theme="geocities"] .about-dialog p {
+  color: #000;
+}
+[data-theme="geocities"] .theme-option {
+  border: 3px outset var(--geo-silver);
+  background: #fff;
+}
+[data-theme="geocities"] .theme-option.active {
+  border-style: inset;
+  background: #ccffff;
+}
+[data-theme="geocities"] .preview-modal img {
+  border: 8px ridge var(--geo-magenta);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="always"])[data-theme="geocities"] .topbar::after,
+  :root:not([data-motion="always"])[data-theme="geocities"] .brand,
+  :root:not([data-motion="always"])[data-theme="geocities"] .brand::after,
+  :root:not([data-motion="always"])[data-theme="geocities"] .brand-mark,
+  :root:not([data-motion="always"])[data-theme="geocities"] h2,
+  :root:not([data-motion="always"])[data-theme="geocities"] .eyebrow,
+  :root:not([data-motion="always"])[data-theme="geocities"] .panel-label,
+  :root:not([data-motion="always"])[data-theme="geocities"] .about-dialog h2 em,
+  :root:not([data-motion="always"])[data-theme="geocities"] .pulse {
+    animation: none;
+  }
+  :root:not([data-motion="always"])[data-theme="geocities"] .topbar::after {
+    text-align: center;
+  }
+}
+:root[data-motion="off"][data-theme="geocities"] .topbar::after,
+:root[data-motion="off"][data-theme="geocities"] .brand,
+:root[data-motion="off"][data-theme="geocities"] .brand::after,
+:root[data-motion="off"][data-theme="geocities"] .brand-mark,
+:root[data-motion="off"][data-theme="geocities"] h2,
+:root[data-motion="off"][data-theme="geocities"] .eyebrow,
+:root[data-motion="off"][data-theme="geocities"] .panel-label,
+:root[data-motion="off"][data-theme="geocities"] .about-dialog h2 em,
+:root[data-motion="off"][data-theme="geocities"] .pulse {
+  animation: none;
+}
+:root[data-motion="off"][data-theme="geocities"] .topbar::after {
+  text-align: center;
+}

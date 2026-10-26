@@ -1,0 +1,233 @@
+/* Retro Future theme: phosphor terminal; !important beats classic colours on a dark base. */
+:root[data-theme="retro-future"] {
+  --rf-green: #3cff8f;
+  --rf-dim: #1fa85a;
+  --rf-faint: #0f5a31;
+  --rf-bg: #031a0d;
+  --rf-amber: #ffb642;
+  --rf-glow: 0 0 6px rgba(60, 255, 143, 0.55);
+  color: var(--rf-green);
+  background: radial-gradient(ellipse at center, #0a2b17 0%, #020c06 80%) fixed;
+}
+[data-theme="retro-future"] body::after {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.22) 0 1px,
+    transparent 1px 3px
+  );
+  content: "";
+  pointer-events: none;
+}
+/* Rounded CRT tube: dark bezel outside the curved glass, vignette and glare inside */
+[data-theme="retro-future"] body {
+  padding: 28px 22px;
+}
+[data-theme="retro-future"] body::before {
+  position: fixed;
+  z-index: 51;
+  inset: 10px;
+  border-radius: 6% / 9%;
+  background:
+    radial-gradient(
+      ellipse 120% 90% at 30% 15%,
+      rgba(200, 255, 220, 0.07),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.35) 80%,
+      rgba(0, 0, 0, 0.85) 100%
+    );
+  box-shadow:
+    0 0 0 100vmax #0b0d0b,
+    inset 0 0 40px 8px rgba(0, 0, 0, 0.9),
+    inset 0 0 120px rgba(60, 255, 143, 0.08);
+  content: "";
+  pointer-events: none;
+}
+[data-theme="retro-future"] .app-shell {
+  text-shadow: var(--rf-glow);
+}
+[data-theme="retro-future"] .app-shell,
+[data-theme="retro-future"] .app-shell :where(*:not(.theme-swatch)) {
+  color: var(--rf-green) !important;
+  background-color: transparent !important;
+  border-color: var(--rf-dim) !important;
+  box-shadow: none !important;
+  font-family: "Share Tech Mono", "DM Mono", monospace !important;
+}
+[data-theme="retro-future"] .app-shell::before {
+  display: block;
+  margin-bottom: 18px;
+  content: "ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL · DUPLICATE RECLAMATION UNIT";
+  font:
+    18px "VT323",
+    monospace;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+[data-theme="retro-future"] .app-shell *::placeholder {
+  color: var(--rf-dim) !important;
+}
+[data-theme="retro-future"] .app-shell :focus-visible {
+  outline: 2px solid var(--rf-green) !important;
+  outline-offset: 2px;
+}
+[data-theme="retro-future"] .app-shell input[type="checkbox"],
+[data-theme="retro-future"] .app-shell input[type="radio"] {
+  accent-color: var(--rf-green);
+}
+[data-theme="retro-future"] .app-shell h2,
+[data-theme="retro-future"] .app-shell .brand,
+[data-theme="retro-future"] .app-shell .summary-grid strong,
+[data-theme="retro-future"] .app-shell .theme-option-text strong {
+  font-family: "VT323", monospace !important;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+[data-theme="retro-future"] .app-shell h2 {
+  font-size: 38px;
+}
+[data-theme="retro-future"] .app-shell h2::after {
+  content: "█";
+  margin-left: 6px;
+  animation: rf-cursor 1.1s steps(1) infinite;
+}
+@keyframes rf-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+[data-theme="retro-future"] .app-shell .brand {
+  font-size: 24px;
+}
+[data-theme="retro-future"] .app-shell .summary-grid strong {
+  font-size: 34px;
+}
+[data-theme="retro-future"] .app-shell .eyebrow::before {
+  content: "[ ";
+}
+[data-theme="retro-future"] .app-shell .eyebrow::after {
+  content: " ]";
+}
+[data-theme="retro-future"] .app-shell .topbar,
+[data-theme="retro-future"] .app-shell .results-tabs {
+  border-bottom: 2px solid var(--rf-green) !important;
+}
+[data-theme="retro-future"] .app-shell .scan-panel,
+[data-theme="retro-future"] .app-shell .duplicate-group,
+[data-theme="retro-future"] .app-shell .duplicate-folder,
+[data-theme="retro-future"] .app-shell .preview-pane,
+[data-theme="retro-future"] .app-shell .summary-grid {
+  border: 2px solid var(--rf-dim) !important;
+  background-color: rgba(3, 26, 13, 0.85) !important;
+}
+[data-theme="retro-future"] .app-shell .preview-frame {
+  background-color: #000 !important;
+}
+[data-theme="retro-future"] .app-shell .duplicate-group.selected {
+  border-color: var(--rf-green) !important;
+  box-shadow:
+    0 0 12px rgba(60, 255, 143, 0.35),
+    inset 0 0 12px rgba(60, 255, 143, 0.15) !important;
+}
+/* Pip-Boy style inverted highlight */
+[data-theme="retro-future"] .app-shell .brand-mark,
+[data-theme="retro-future"] .app-shell .pulse,
+[data-theme="retro-future"] .app-shell .scan-button,
+[data-theme="retro-future"] .app-shell .filter-preset.active,
+[data-theme="retro-future"] .app-shell .match-mode-control button.active,
+[data-theme="retro-future"] .app-shell .move-source-control button.active,
+[data-theme="retro-future"] .app-shell .results-tabs button.active,
+[data-theme="retro-future"] .app-shell .selected .group-toggle span,
+[data-theme="retro-future"] .app-shell .keep-button.is-kept,
+[data-theme="retro-future"] .app-shell .file-row.preview-selected,
+[data-theme="retro-future"] .app-shell .file-row.preview-selected *,
+[data-theme="retro-future"] .app-shell .theme-option.active,
+[data-theme="retro-future"] .app-shell .theme-option.active .theme-option-text,
+[data-theme="retro-future"]
+  .app-shell
+  .theme-option.active
+  .theme-option-text
+  *,
+[data-theme="retro-future"] .app-shell button:not(:disabled):hover,
+[data-theme="retro-future"] .app-shell .file-row:hover,
+[data-theme="retro-future"] .app-shell .file-row:hover * {
+  border-color: var(--rf-green) !important;
+  background-color: var(--rf-green) !important;
+  color: #021208 !important;
+  text-shadow: none;
+}
+[data-theme="retro-future"] .app-shell .scan-button *,
+[data-theme="retro-future"] .app-shell .brand-mark * {
+  color: #021208 !important;
+  background-color: var(--rf-green) !important;
+}
+[data-theme="retro-future"] .app-shell .scan-button,
+[data-theme="retro-future"] .app-shell .brand-mark {
+  text-shadow: none;
+  box-shadow: 0 0 10px rgba(60, 255, 143, 0.6) !important;
+}
+[data-theme="retro-future"] .app-shell .results-tabs button {
+  padding: 4px 10px 6px;
+}
+[data-theme="retro-future"] .app-shell .results-tabs button.active::after {
+  display: none;
+}
+[data-theme="retro-future"] .app-shell .delete-all-control,
+[data-theme="retro-future"] .app-shell .delete-all-control *,
+[data-theme="retro-future"] .app-shell .delete-all-warning,
+[data-theme="retro-future"] .app-shell .move-error,
+[data-theme="retro-future"] .app-shell .delete-error-dialog h2,
+[data-theme="retro-future"] .app-shell .clear-folders-button,
+[data-theme="retro-future"] .app-shell .remove-folder {
+  color: var(--rf-amber) !important;
+  border-color: var(--rf-amber) !important;
+  text-shadow: 0 0 6px rgba(255, 182, 66, 0.55);
+}
+[data-theme="retro-future"] .app-shell .delete-all-control input {
+  accent-color: var(--rf-amber);
+}
+[data-theme="retro-future"] .app-shell .duplicate-group.delete-all-selected {
+  border-color: var(--rf-amber) !important;
+  box-shadow: 0 0 12px rgba(255, 182, 66, 0.35) !important;
+}
+[data-theme="retro-future"] .app-shell .group-delete-button:not(:disabled) {
+  border-color: var(--rf-amber) !important;
+  background-color: var(--rf-amber) !important;
+  color: #1a0f00 !important;
+  text-shadow: none;
+}
+[data-theme="retro-future"] .app-shell .about-backdrop {
+  background-color: rgba(1, 8, 4, 0.88) !important;
+}
+[data-theme="retro-future"] .app-shell .about-dialog {
+  border: 2px solid var(--rf-green) !important;
+  background-color: var(--rf-bg) !important;
+  box-shadow: 0 0 24px rgba(60, 255, 143, 0.3) !important;
+}
+[data-theme="retro-future"] .app-shell .preview-modal-close,
+[data-theme="retro-future"] .app-shell .preview-modal-nav,
+[data-theme="retro-future"] .app-shell .preview-modal-caption {
+  border: 2px solid var(--rf-green) !important;
+  background-color: rgba(3, 26, 13, 0.9) !important;
+}
+[data-theme="retro-future"] .app-shell .preview-modal img {
+  border: 2px solid var(--rf-green);
+  background-color: #000 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="always"])[data-theme="retro-future"]
+    .app-shell
+    h2::after {
+    animation: none;
+  }
+}
+:root[data-motion="off"][data-theme="retro-future"] .app-shell h2::after {
+  animation: none;
+}

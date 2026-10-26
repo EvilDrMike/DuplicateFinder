@@ -1,0 +1,383 @@
+/* Windows 10 theme */
+:root[data-theme="win10"] {
+  --w10-accent: #0078d7;
+  --w10-accent-dark: #005a9e;
+  --w10-accent-light: #4cc2ff;
+  --w10-select: #cce8ff;
+  --w10-select-border: #99d1ff;
+  --w10-hover: #e5f3ff;
+  --w10-line: #e5e5e5;
+  --w10-red: #e81123;
+  color: #000;
+  /* Hero-style light beam wallpaper */
+  background:
+    radial-gradient(
+      ellipse at 30% 65%,
+      rgba(0, 120, 215, 0.6),
+      transparent 60%
+    ),
+    linear-gradient(135deg, #001e3c 0%, #003a75 50%, #0b0f2e 100%) fixed;
+}
+[data-theme="win10"] .app-shell,
+[data-theme="win10"] .app-shell :where(*) {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0;
+}
+[data-theme="win10"] .app-shell {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-top: 0;
+  border: 1px solid var(--w10-accent);
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+[data-theme="win10"] .app-shell :focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 1px;
+}
+[data-theme="win10"] .app-shell input[type="checkbox"],
+[data-theme="win10"] .app-shell input[type="radio"] {
+  accent-color: var(--w10-accent);
+}
+/* Title bar with caption buttons */
+[data-theme="win10"] .topbar {
+  gap: 8px;
+  height: 32px;
+  margin: 0 -42px 24px;
+  padding: 0 0 0 12px;
+  border-bottom: 0;
+  background: #fff;
+}
+[data-theme="win10"] .topbar::after {
+  width: 138px;
+  height: 32px;
+  padding-left: 18px;
+  color: #000;
+  content: "\E921\E922\E8BB";
+  font:
+    10px/32px "Segoe MDL2 Assets",
+    sans-serif;
+  letter-spacing: 36px;
+  white-space: nowrap;
+}
+[data-theme="win10"] .brand {
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 400;
+}
+[data-theme="win10"] .brand-mark {
+  width: 16px;
+  height: 16px;
+  background: var(--w10-accent);
+  color: #fff;
+  font:
+    600 7px "Segoe UI",
+    sans-serif;
+  letter-spacing: 0;
+}
+[data-theme="win10"] .topbar-actions {
+  gap: 0;
+}
+[data-theme="win10"] .about-button {
+  height: 32px;
+  padding: 0 12px;
+  color: #000;
+  font-size: 12px;
+  text-transform: none;
+}
+[data-theme="win10"] .about-button:hover {
+  background: #e5e5e5;
+  color: #000;
+}
+[data-theme="win10"] .app-shell h2 {
+  font-size: 28px;
+  font-weight: 300;
+}
+[data-theme="win10"] .eyebrow {
+  color: var(--w10-accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+}
+/* Dark Start-menu style scan panel */
+[data-theme="win10"] .scan-panel {
+  background: #2b2b2b;
+  color: #fff;
+}
+[data-theme="win10"] .panel-label,
+[data-theme="win10"] .scan-panel-toggle,
+[data-theme="win10"] .scan-panel .folder-symbol,
+[data-theme="win10"] .folder-icon {
+  color: var(--w10-accent-light);
+}
+[data-theme="win10"] .panel-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+[data-theme="win10"] .pulse {
+  border-radius: 0;
+  background: var(--w10-accent-light);
+  box-shadow: none;
+}
+[data-theme="win10"] .folder-picker-row div > span,
+[data-theme="win10"] .folder-list-heading,
+[data-theme="win10"] .filter-row > span,
+[data-theme="win10"] .match-mode-row > div:first-child span,
+[data-theme="win10"] .status,
+[data-theme="win10"] .folder-empty {
+  color: #b3b3b3;
+}
+[data-theme="win10"] .filter-input,
+[data-theme="win10"] .manual-folder-row,
+[data-theme="win10"] .folder-item,
+[data-theme="win10"] .path-field {
+  border: 2px solid #666;
+  background: #1f1f1f;
+}
+[data-theme="win10"] .filter-input:focus,
+[data-theme="win10"] .manual-folder-row:focus-within {
+  border-color: var(--w10-accent);
+}
+[data-theme="win10"] .add-path-button {
+  border-left: 0;
+  background: #3c3c3c;
+  color: #fff;
+}
+[data-theme="win10"] .browse-button,
+[data-theme="win10"] .clear-folders-button,
+[data-theme="win10"] .filter-preset,
+[data-theme="win10"] .match-mode-control button {
+  border: 2px solid transparent;
+  background: #3c3c3c;
+  color: #fff;
+}
+[data-theme="win10"] .match-mode-control {
+  gap: 4px;
+  border: 0;
+}
+[data-theme="win10"] .match-mode-control button + button {
+  border-left: 2px solid transparent;
+}
+[data-theme="win10"] .clear-folders-button {
+  color: #ff99a4;
+}
+[data-theme="win10"] .browse-button:hover:not(:disabled),
+[data-theme="win10"] .clear-folders-button:hover:not(:disabled),
+[data-theme="win10"] .add-path-button:hover:not(:disabled),
+[data-theme="win10"] .filter-preset:hover,
+[data-theme="win10"] .match-mode-control button:not(.active):hover {
+  border-color: #999;
+  background: #3c3c3c;
+  color: #fff;
+}
+[data-theme="win10"] .filter-preset.active,
+[data-theme="win10"] .match-mode-control button.active {
+  border-color: var(--w10-accent);
+  background: var(--w10-accent);
+  color: #fff;
+}
+/* Accent button */
+[data-theme="win10"] .scan-button {
+  border: 2px solid transparent;
+  background: var(--w10-accent);
+  color: #fff;
+  font-weight: 400;
+}
+[data-theme="win10"] .scan-button:hover:not(:disabled) {
+  border-color: var(--w10-accent-dark);
+  background: var(--w10-accent);
+  transform: none;
+}
+[data-theme="win10"] .scan-button:active:not(:disabled) {
+  background: var(--w10-accent-dark);
+}
+/* Live tile summary */
+[data-theme="win10"] .summary-grid,
+[data-theme="win10"] .summary-grid > div {
+  border-color: var(--w10-line);
+}
+[data-theme="win10"] .summary-grid span,
+[data-theme="win10"] .summary-grid small {
+  color: #555;
+}
+[data-theme="win10"] .summary-grid strong {
+  font-weight: 300;
+}
+[data-theme="win10"] .summary-grid .accent-stat {
+  background: var(--w10-accent);
+}
+[data-theme="win10"] .summary-grid .accent-stat strong,
+[data-theme="win10"] .summary-grid .accent-stat span,
+[data-theme="win10"] .summary-grid .accent-stat small {
+  color: #fff;
+}
+/* Pivot tabs */
+[data-theme="win10"] .results-tabs {
+  gap: 24px;
+  border-bottom-color: var(--w10-line);
+}
+[data-theme="win10"] .results-tabs button {
+  color: #767676;
+  font-size: 15px;
+  text-transform: none;
+}
+[data-theme="win10"] .results-tabs button:hover {
+  color: #000;
+}
+[data-theme="win10"] .results-tabs button.active {
+  color: #000;
+  font-weight: 600;
+}
+[data-theme="win10"] .results-tabs button.active::after {
+  background: var(--w10-accent);
+}
+/* Standard buttons */
+[data-theme="win10"] .delete-button,
+[data-theme="win10"] .pagination button,
+[data-theme="win10"] .keep-button,
+[data-theme="win10"] .reveal-button,
+[data-theme="win10"] .folder-reorder-controls button,
+[data-theme="win10"] .move-source-control button,
+[data-theme="win10"] .results-settings select {
+  border: 2px solid transparent;
+  background: #ccc;
+  color: #000;
+}
+[data-theme="win10"] .move-source-control {
+  gap: 4px;
+  border: 0;
+}
+[data-theme="win10"] .move-source-control button + button {
+  border-left: 2px solid transparent;
+}
+[data-theme="win10"] .delete-button:not(:disabled):hover,
+[data-theme="win10"] .pagination button:hover:not(:disabled),
+[data-theme="win10"] .keep-button:hover,
+[data-theme="win10"] .reveal-button:hover,
+[data-theme="win10"] .folder-reorder-controls button:hover:not(:disabled),
+[data-theme="win10"] .move-source-control button:not(.active):hover {
+  border-color: #7a7a7a;
+  background: #ccc;
+  color: #000;
+}
+[data-theme="win10"] .keep-button.is-kept,
+[data-theme="win10"] .move-source-control button.active {
+  border-color: var(--w10-accent);
+  background: var(--w10-accent);
+  color: #fff;
+}
+/* Explorer-style list selection */
+[data-theme="win10"] .duplicate-group,
+[data-theme="win10"] .duplicate-folder,
+[data-theme="win10"] .preview-pane {
+  border: 1px solid var(--w10-line);
+  background: #fff;
+}
+[data-theme="win10"] .duplicate-group.selected {
+  border-color: var(--w10-select-border);
+  background: #f2f9ff;
+}
+[data-theme="win10"] .duplicate-group.delete-all-selected {
+  border-color: var(--w10-red);
+  background: #fde7e9;
+}
+[data-theme="win10"] .group-toggle {
+  border-right-color: var(--w10-line);
+}
+[data-theme="win10"] .group-toggle span {
+  border: 2px solid #333;
+}
+[data-theme="win10"] .selected .group-toggle span {
+  border-color: var(--w10-accent);
+  background: var(--w10-accent);
+}
+[data-theme="win10"] .file-row {
+  border-top-color: #f0f0f0;
+  color: #333;
+}
+[data-theme="win10"] .file-row:hover {
+  background: var(--w10-hover);
+}
+[data-theme="win10"] .file-row.preview-selected {
+  background: var(--w10-select);
+  box-shadow: inset 0 0 0 1px var(--w10-select-border);
+}
+[data-theme="win10"] .file-type {
+  background: #e5f1fb;
+  color: var(--w10-accent-dark);
+}
+[data-theme="win10"] .preview-heading {
+  border-bottom-color: var(--w10-line);
+}
+[data-theme="win10"] .preview-frame {
+  background: #f2f2f2;
+}
+/* Destructive actions */
+[data-theme="win10"] .delete-all-control,
+[data-theme="win10"] .delete-all-warning,
+[data-theme="win10"] .move-error,
+[data-theme="win10"] .delete-error-dialog h2 {
+  color: #c50f1f !important;
+}
+[data-theme="win10"] .delete-all-control input {
+  accent-color: var(--w10-red);
+}
+[data-theme="win10"] .group-delete-button {
+  border: 2px solid transparent;
+  background: var(--w10-red);
+}
+[data-theme="win10"] .group-delete-button:not(:disabled):hover {
+  border-color: #8f0a15;
+  background: var(--w10-red);
+}
+/* Content dialogs */
+[data-theme="win10"] .about-backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+[data-theme="win10"] .about-dialog {
+  border: 1px solid var(--w10-accent);
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+[data-theme="win10"] .about-dialog h2 {
+  color: #000;
+  font-weight: 300;
+}
+[data-theme="win10"] .about-dialog h2 em {
+  color: var(--w10-accent);
+}
+[data-theme="win10"] .about-dialog p {
+  color: #333;
+}
+[data-theme="win10"] .about-close:hover {
+  background: var(--w10-red);
+  color: #fff;
+}
+[data-theme="win10"] .theme-option {
+  border: 2px solid var(--w10-line);
+}
+[data-theme="win10"] .theme-option:hover {
+  border-color: #999;
+}
+[data-theme="win10"] .theme-option.active {
+  border-color: var(--w10-accent);
+  background: var(--w10-select);
+}
+[data-theme="win10"] .preview-modal-close:hover {
+  background: var(--w10-red);
+}
+[data-theme="win10"] .preview-modal-nav:not(:disabled):hover {
+  background: var(--w10-accent);
+}
+[data-theme="win10"] .preview-modal img {
+  border: 1px solid var(--w10-accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+@media (max-width: 680px) {
+  [data-theme="win10"] .topbar {
+    margin: 0 -18px 20px;
+  }
+  [data-theme="win10"] .topbar::after {
+    display: none;
+  }
+}

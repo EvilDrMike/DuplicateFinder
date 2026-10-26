@@ -1,0 +1,315 @@
+/* Windows for Workgroups 3.11 theme; !important beats classic colours. */
+:root[data-theme="win311"] {
+  --w31-grey: #c0c0c0;
+  --w31-dark: #808080;
+  --w31-navy: #000080;
+  --w31-maroon: #800000;
+  --w31-button: inset 1px 1px 0 #fff, inset -2px -2px 0 var(--w31-dark);
+  --w31-pressed: inset 1px 1px 0 var(--w31-dark);
+  color: #000;
+  background: var(--w31-grey);
+}
+[data-theme="win311"] .app-shell,
+[data-theme="win311"] .app-shell :where(*:not(.theme-swatch)) {
+  color: #000 !important;
+  background-color: transparent !important;
+  border-color: #000 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  font-family:
+    "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+[data-theme="win311"] .app-shell *::placeholder {
+  color: var(--w31-dark) !important;
+}
+[data-theme="win311"] .app-shell :focus-visible {
+  outline: 1px dotted #000 !important;
+  outline-offset: -4px;
+}
+[data-theme="win311"] .app-shell input[type="checkbox"],
+[data-theme="win311"] .app-shell input[type="radio"] {
+  accent-color: var(--w31-navy);
+}
+[data-theme="win311"] .app-shell h2,
+[data-theme="win311"] .app-shell .brand,
+[data-theme="win311"] .app-shell .eyebrow,
+[data-theme="win311"] .app-shell .panel-label,
+[data-theme="win311"] .app-shell .summary-grid strong,
+[data-theme="win311"] .app-shell button {
+  font-weight: 700;
+}
+[data-theme="win311"] .app-shell h2 {
+  font-size: 24px;
+}
+[data-theme="win311"] .app-shell .summary-grid strong {
+  font-size: 22px;
+}
+/* Main window: thick grey sizing frame with black edges */
+[data-theme="win311"] .app-shell {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding-top: 0;
+  border: 4px solid !important;
+  border-color: var(--w31-grey) !important;
+  outline: 1px solid #000;
+  background-color: #fff !important;
+  box-shadow: inset 0 0 0 1px #000 !important;
+}
+/* Title bar with control-menu box and minimise/maximise buttons; actions wrap into a menu bar */
+[data-theme="win311"] .app-shell .topbar {
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0 -42px 24px;
+  padding: 0;
+  border-bottom: 0;
+}
+[data-theme="win311"] .topbar::before,
+[data-theme="win311"] .topbar::after {
+  order: 0;
+  flex-shrink: 0;
+  height: 22px;
+  border: 1px solid #000;
+  background-color: var(--w31-grey);
+  content: "";
+}
+[data-theme="win311"] .topbar::before {
+  width: 24px;
+  background:
+    linear-gradient(#fff, #fff) center / 13px 3px no-repeat,
+    var(--w31-grey);
+  box-shadow: inset 0 0 0 0 #000;
+  outline: 1px solid var(--w31-dark);
+  outline-offset: -8px;
+}
+[data-theme="win311"] .topbar::after {
+  order: 2;
+  width: 44px;
+  content: "▼▲";
+  font-size: 9px;
+  line-height: 20px;
+  letter-spacing: 6px;
+  text-align: center;
+  text-indent: 5px;
+  box-shadow:
+    inset 1px 1px 0 #fff,
+    inset -2px -2px 0 var(--w31-dark);
+  background:
+    linear-gradient(#000, #000) 50% 0 / 1px 100% no-repeat,
+    var(--w31-grey);
+}
+[data-theme="win311"] .app-shell .brand {
+  order: 1;
+  flex: 1;
+  justify-content: center;
+  height: 22px;
+  border-bottom: 1px solid #000 !important;
+  background-color: var(--w31-navy) !important;
+  font-size: 13px;
+}
+[data-theme="win311"] .app-shell .brand,
+[data-theme="win311"] .app-shell .brand * {
+  color: #fff !important;
+}
+[data-theme="win311"] .app-shell .brand-mark {
+  display: none;
+}
+[data-theme="win311"] .app-shell .topbar-actions {
+  order: 3;
+  flex-basis: 100%;
+  gap: 0;
+  margin: 0;
+  padding: 1px 4px;
+  border-top: 1px solid #000 !important;
+  border-bottom: 1px solid #000 !important;
+}
+[data-theme="win311"] .app-shell .about-button {
+  padding: 2px 8px;
+  font-size: 13px;
+  text-transform: none;
+}
+[data-theme="win311"] .app-shell .about-button:hover {
+  background-color: var(--w31-navy) !important;
+  color: #fff !important;
+}
+/* Push buttons */
+[data-theme="win311"] .app-shell .scan-button,
+[data-theme="win311"] .app-shell .browse-button,
+[data-theme="win311"] .app-shell .clear-folders-button,
+[data-theme="win311"] .app-shell .add-path-button,
+[data-theme="win311"] .app-shell .filter-preset,
+[data-theme="win311"] .app-shell .match-mode-control button,
+[data-theme="win311"] .app-shell .move-source-control button,
+[data-theme="win311"] .app-shell .results-tabs button,
+[data-theme="win311"] .app-shell .delete-button,
+[data-theme="win311"] .app-shell .pagination button,
+[data-theme="win311"] .app-shell .keep-button,
+[data-theme="win311"] .app-shell .reveal-button,
+[data-theme="win311"] .app-shell .folder-reorder-controls button,
+[data-theme="win311"] .app-shell .group-delete-button,
+[data-theme="win311"] .app-shell .remove-folder,
+[data-theme="win311"] .app-shell .about-close,
+[data-theme="win311"] .app-shell .preview-modal-close,
+[data-theme="win311"] .app-shell .preview-modal-nav {
+  border: 1px solid #000 !important;
+  border-radius: 2px !important;
+  background-color: var(--w31-grey) !important;
+  box-shadow: var(--w31-button) !important;
+}
+[data-theme="win311"] .app-shell .scan-button {
+  border-width: 2px !important;
+}
+[data-theme="win311"] .app-shell .about-close {
+  width: 22px;
+  height: 20px;
+  font-size: 16px;
+}
+[data-theme="win311"] .app-shell button:active:not(:disabled),
+[data-theme="win311"] .app-shell .filter-preset.active,
+[data-theme="win311"] .app-shell .match-mode-control button.active,
+[data-theme="win311"] .app-shell .move-source-control button.active,
+[data-theme="win311"] .app-shell .results-tabs button.active,
+[data-theme="win311"] .app-shell .keep-button.is-kept {
+  box-shadow: var(--w31-pressed) !important;
+  background-color: var(--w31-dark) !important;
+  color: #fff !important;
+}
+[data-theme="win311"] .app-shell .scan-button:hover:not(:disabled) {
+  transform: none;
+}
+[data-theme="win311"] .app-shell button:disabled {
+  color: var(--w31-dark) !important;
+  opacity: 1;
+}
+[data-theme="win311"] .app-shell .match-mode-control,
+[data-theme="win311"] .app-shell .move-source-control {
+  gap: 4px;
+  border: 0;
+}
+[data-theme="win311"] .app-shell .results-tabs {
+  gap: 6px;
+  border-bottom: 1px solid #000 !important;
+}
+[data-theme="win311"] .app-shell .results-tabs button {
+  margin-bottom: 6px;
+  padding: 4px 12px;
+}
+[data-theme="win311"] .app-shell .results-tabs button.active::after {
+  display: none;
+}
+/* Group boxes, list boxes and edit fields */
+[data-theme="win311"] .app-shell .scan-panel,
+[data-theme="win311"] .app-shell .summary-grid,
+[data-theme="win311"] .app-shell .summary-grid > div,
+[data-theme="win311"] .app-shell .duplicate-group,
+[data-theme="win311"] .app-shell .duplicate-folder,
+[data-theme="win311"] .app-shell .preview-pane,
+[data-theme="win311"] .app-shell .filter-input,
+[data-theme="win311"] .app-shell .manual-folder-row,
+[data-theme="win311"] .app-shell .folder-item,
+[data-theme="win311"] .app-shell .path-field,
+[data-theme="win311"] .app-shell .folder-empty,
+[data-theme="win311"] .app-shell .move-destination-control input,
+[data-theme="win311"] .app-shell .results-settings select,
+[data-theme="win311"] .app-shell .move-file-list,
+[data-theme="win311"] .app-shell .theme-option {
+  border: 1px solid #000 !important;
+  background-color: #fff !important;
+}
+[data-theme="win311"] .app-shell .group-toggle {
+  border-right: 1px solid #000 !important;
+}
+[data-theme="win311"] .app-shell .group-toggle span {
+  border: 1px solid #000 !important;
+  background-color: #fff !important;
+}
+[data-theme="win311"] .app-shell .selected .group-toggle span {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+[data-theme="win311"] .app-shell .preview-frame,
+[data-theme="win311"] .app-shell .accent-stat {
+  background-color: var(--w31-grey) !important;
+}
+/* Navy selection highlight */
+[data-theme="win311"] .app-shell .file-row.preview-selected,
+[data-theme="win311"] .app-shell .file-row.preview-selected .file-path,
+[data-theme="win311"] .app-shell .theme-option.active,
+[data-theme="win311"] .app-shell .theme-option.active .theme-option-text,
+[data-theme="win311"] .app-shell .theme-option.active .theme-option-text *,
+[data-theme="win311"] .app-shell .preview-heading,
+[data-theme="win311"] .app-shell .preview-heading * {
+  background-color: var(--w31-navy) !important;
+  color: #fff !important;
+}
+[data-theme="win311"] .app-shell .duplicate-group.selected {
+  outline: 2px solid var(--w31-navy);
+  outline-offset: -3px;
+}
+[data-theme="win311"] .app-shell .file-row:not(.preview-selected):hover {
+  background-color: #e0e0e0 !important;
+}
+[data-theme="win311"] .app-shell .pulse {
+  background-color: var(--w31-navy) !important;
+}
+/* Destructive actions in maroon */
+[data-theme="win311"] .app-shell .delete-all-control,
+[data-theme="win311"] .app-shell .delete-all-control *,
+[data-theme="win311"] .app-shell .delete-all-warning,
+[data-theme="win311"] .app-shell .move-error,
+[data-theme="win311"] .app-shell .delete-error-dialog h2 {
+  color: var(--w31-maroon) !important;
+}
+[data-theme="win311"] .app-shell .group-delete-button:not(:disabled) {
+  color: var(--w31-maroon) !important;
+}
+[data-theme="win311"] .app-shell .duplicate-group.delete-all-selected {
+  outline: 2px solid var(--w31-maroon);
+  outline-offset: -3px;
+}
+/* Dialogs */
+[data-theme="win311"] .app-shell .about-backdrop {
+  background-color: transparent !important;
+}
+[data-theme="win311"] .app-shell .about-dialog {
+  padding-top: 0;
+  border: 4px solid !important;
+  border-color: var(--w31-grey) !important;
+  outline: 1px solid #000;
+  background-color: #fff !important;
+  box-shadow:
+    inset 0 0 0 1px #000,
+    4px 4px 0 rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="win311"] .app-shell .about-dialog-heading {
+  align-items: center;
+  margin: 0 -28px;
+  padding: 1px 4px;
+  border-bottom: 1px solid #000 !important;
+  background-color: var(--w31-navy) !important;
+}
+[data-theme="win311"] .app-shell .about-dialog-heading .eyebrow {
+  color: #fff !important;
+}
+[data-theme="win311"] .app-shell .about-dialog h2 em {
+  color: var(--w31-navy) !important;
+}
+[data-theme="win311"] .app-shell .preview-modal-caption {
+  border-top: 1px solid #000 !important;
+  background-color: var(--w31-navy) !important;
+  color: #fff !important;
+}
+[data-theme="win311"] .app-shell .preview-modal-caption * {
+  color: #fff !important;
+}
+[data-theme="win311"] .app-shell .preview-modal img {
+  border: 4px solid var(--w31-grey);
+  outline: 1px solid #000;
+  background-color: #fff !important;
+}
+@media (max-width: 680px) {
+  [data-theme="win311"] .app-shell .topbar {
+    margin: 0 -18px 20px;
+  }
+}

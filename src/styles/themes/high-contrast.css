@@ -1,0 +1,130 @@
+/* High contrast theme: overrides use !important to beat the classic component colours. */
+:root[data-theme="high-contrast"] {
+  color: #fff;
+  background: #000;
+  --hc-accent: #ffff00;
+  --hc-danger: #ff8a8a;
+}
+[data-theme="high-contrast"] .app-shell,
+[data-theme="high-contrast"] .app-shell * {
+  color: #fff !important;
+  background-color: #000 !important;
+  border-color: #fff !important;
+  box-shadow: none !important;
+}
+[data-theme="high-contrast"] .app-shell *::placeholder {
+  color: #d0d0d0 !important;
+}
+[data-theme="high-contrast"] .app-shell :focus-visible {
+  outline: 3px solid var(--hc-accent) !important;
+  outline-offset: 2px;
+}
+[data-theme="high-contrast"] .app-shell input[type="checkbox"],
+[data-theme="high-contrast"] .app-shell input[type="radio"] {
+  accent-color: var(--hc-accent);
+}
+[data-theme="high-contrast"] .app-shell button:not(:disabled):hover,
+[data-theme="high-contrast"] .app-shell .file-row:hover,
+[data-theme="high-contrast"] .app-shell .theme-option:hover {
+  outline: 2px solid var(--hc-accent) !important;
+  outline-offset: -2px;
+}
+[data-theme="high-contrast"] .app-shell .eyebrow,
+[data-theme="high-contrast"] .app-shell .panel-label,
+[data-theme="high-contrast"] .app-shell .about-dialog h2 em,
+[data-theme="high-contrast"] .app-shell .accent-stat strong,
+[data-theme="high-contrast"] .app-shell .results-tabs button.active,
+[data-theme="high-contrast"] .app-shell .folder-symbol,
+[data-theme="high-contrast"] .app-shell .preview-icon {
+  color: var(--hc-accent) !important;
+}
+[data-theme="high-contrast"] .app-shell .results-tabs button.active::after {
+  background-color: var(--hc-accent) !important;
+}
+[data-theme="high-contrast"] .app-shell .brand-mark,
+[data-theme="high-contrast"] .app-shell .pulse,
+[data-theme="high-contrast"] .app-shell .scan-button,
+[data-theme="high-contrast"] .app-shell .filter-preset.active,
+[data-theme="high-contrast"] .app-shell .match-mode-control button.active,
+[data-theme="high-contrast"] .app-shell .move-source-control button.active,
+[data-theme="high-contrast"] .app-shell .selected .group-toggle span,
+[data-theme="high-contrast"] .app-shell .keep-button.is-kept,
+[data-theme="high-contrast"] .app-shell .file-row.preview-selected,
+[data-theme="high-contrast"] .app-shell .theme-option.active,
+[data-theme="high-contrast"] .app-shell .theme-option.active .theme-option-text,
+[data-theme="high-contrast"]
+  .app-shell
+  .theme-option.active
+  .theme-option-text
+  * {
+  border-color: var(--hc-accent) !important;
+  background-color: var(--hc-accent) !important;
+  color: #000 !important;
+}
+[data-theme="high-contrast"] .app-shell .file-row.preview-selected * {
+  color: #000 !important;
+  background-color: var(--hc-accent) !important;
+  border-color: #000 !important;
+}
+[data-theme="high-contrast"] .app-shell .scan-button *,
+[data-theme="high-contrast"] .app-shell .brand-mark * {
+  color: #000 !important;
+  background-color: var(--hc-accent) !important;
+}
+[data-theme="high-contrast"] .app-shell .delete-all-control,
+[data-theme="high-contrast"] .app-shell .delete-all-control *,
+[data-theme="high-contrast"] .app-shell .delete-all-warning,
+[data-theme="high-contrast"] .app-shell .move-error,
+[data-theme="high-contrast"] .app-shell .delete-error-dialog h2,
+[data-theme="high-contrast"] .app-shell .clear-folders-button {
+  color: var(--hc-danger) !important;
+}
+[data-theme="high-contrast"] .app-shell .duplicate-group.delete-all-selected {
+  border: 2px solid var(--hc-danger) !important;
+}
+[data-theme="high-contrast"] .app-shell .group-delete-button:not(:disabled) {
+  border-color: var(--hc-danger) !important;
+  background-color: var(--hc-danger) !important;
+  color: #000 !important;
+}
+[data-theme="high-contrast"] .app-shell .about-backdrop {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+}
+[data-theme="high-contrast"] .app-shell .about-dialog {
+  border: 2px solid #fff !important;
+}
+[data-theme="high-contrast"] .app-shell .preview-modal-close,
+[data-theme="high-contrast"] .app-shell .preview-modal-nav,
+[data-theme="high-contrast"] .app-shell .preview-modal-caption {
+  border: 2px solid #fff !important;
+}
+[data-theme="high-contrast"] .app-shell .swatch-classic {
+  background: linear-gradient(135deg, #f3f1ea 50%, #26332e 50%) !important;
+  box-shadow: inset -9px -9px 0 #d95f3f !important;
+}
+[data-theme="high-contrast"] .app-shell .swatch-high-contrast {
+  background: linear-gradient(135deg, #000 50%, #fff 50%) !important;
+  box-shadow: inset -9px -9px 0 var(--hc-accent) !important;
+}
+[data-theme="high-contrast"] .app-shell .swatch-seventies {
+  background: linear-gradient(
+    180deg,
+    #e8a33d 0 25%,
+    #c8582a 25% 50%,
+    #7a7f2a 50% 75%,
+    #5a3a22 75%
+  ) !important;
+}
+[data-theme="high-contrast"] .app-shell .swatch-geocities {
+  background:
+    radial-gradient(#fff 1px, transparent 1.5px) 0 0 / 7px 7px,
+    linear-gradient(
+      135deg,
+      #000080 0 50%,
+      #ff00ff 50% 75%,
+      #00ff00 75%
+    ) !important;
+}
+[data-theme="high-contrast"] .app-shell .theme-swatch {
+  border-color: #fff !important;
+}
