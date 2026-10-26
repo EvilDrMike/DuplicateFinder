@@ -1,13 +1,13 @@
 # DuplicateFinder
 
-DuplicateFinder is a Windows desktop application for finding identical files across multiple folders. Scanning happens locally: files are grouped by size first and then compared by content hash.
+DuplicateFinder is a Windows desktop application for finding duplicate files across multiple folders. Scanning happens locally. Choose content matching, which groups files by size and content hash, or case-insensitive filename matching, which can group files with different contents.
 
 ## Using the app
 
 1. Open DuplicateFinder.
 2. Add folders with **Browse** or type a folder path and choose **Add**. Multiple folders can be scanned together.
 3. Optionally enter file extensions such as `jpg, png, pdf`, or choose an image, video, or document preset.
-4. Select **Scan selected folders**.
+4. Choose whether to match by **Content** or **Filename**, then select **Scan selected folders**.
 5. Review the results in the **Files** tab or the **Folder** tab.
 
 ### Files tab
@@ -29,7 +29,7 @@ DuplicateFinder is a Windows desktop application for finding identical files acr
 
 - Scan results, selected folders, page size, and other view settings are stored locally in the app’s WebView storage.
 - Files are not uploaded.
-- Deletion validates that the scanned files still exist before removing anything. If the scan is out of date, deletion is aborted and no files are removed.
+- Deletion validates that each scanned file still exists and matches its scanned content before removing anything. If the scan is out of date, deletion is aborted and no files are removed.
 - Use **Clear all** to remove the selected folders and current scan results.
 
 ## Development

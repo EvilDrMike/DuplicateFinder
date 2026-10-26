@@ -10,6 +10,7 @@ type DuplicateFile = {
   path: string;
   name: string;
   size: number;
+  contentHash?: string;
 };
 
 type DuplicateGroup = {
@@ -23,13 +24,107 @@ type ScanResult = {
   totalSize: number;
 };
 
+type DeleteFileInput = {
+  path: string;
+  expectedHash: string;
+};
+
 type DeleteGroup = {
-  files: string[];
-  keptFile: string;
+  files: DeleteFileInput[];
+  keptFile: DeleteFileInput;
   deleteAll: boolean;
 };
 
-type ResultsTab = "results" | "folders";
+type MoveFileInput = {
+  path: string;
+  expectedHash: string;
+};
+
+type MoveCandidateFile = DuplicateFile & {
+  expectedHash: string;
+};
+
+type MoveResult = {
+  source: string;
+  destination: string;
+};
+
+type MoveSource = "files" | "folders";
+type MatchMode = "content" | "filename";
+
+type ResultsTab = "results" | "folders" | "move";
+
+const uiThemes = [
+  {
+    id: "classic",
+    name: "Classic",
+    description: "The original warm, muted DuplicateFinder look.",
+  },
+  {
+    id: "seventies",
+    name: "1970s",
+    description:
+      "Harvest gold, burnt orange and avocado on retro wallpaper with groovy rounded type.",
+  },
+  {
+    id: "eighties",
+    name: "1980s",
+    description:
+      "Memphis-style pop: hot pink, electric cyan and sunny yellow with bold black outlines.",
+  },
+  {
+    id: "geocities",
+    name: "GeoCities",
+    description:
+      "Welcome to my homepage! Starry tiles, Comic Sans, rainbow headings, bevelled buttons and a visitor counter.",
+  },
+  {
+    id: "retro-future",
+    name: "Retro Future",
+    description:
+      "Wasteland-ready phosphor terminal: glowing green monospace, CRT scanlines and inverted selections.",
+  },
+  {
+    id: "amiga",
+    name: "Amiga",
+    description:
+      "Workbench 2.0's four-colour palette: grey, black, white and blue with bevelled gadgets and window chrome.",
+  },
+  {
+    id: "win311",
+    name: "Windows for Workgroups 3.11",
+    description:
+      "Program Manager chic: navy title bar, white windows, grey push buttons and a menu bar.",
+  },
+  {
+    id: "high-contrast",
+    name: "High contrast",
+    description:
+      "Black background, white text and bright yellow highlights for maximum legibility.",
+  },
+] as const;
+
+type UiTheme = (typeof uiThemes)[number]["id"];
+
+const motionPreferences = [
+  {
+    id: "system",
+    name: "Follow Windows setting",
+    description: "Animations stop when Windows is set to reduce animations.",
+  },
+  {
+    id: "always",
+    name: "Always animate",
+    description: "Play style animations even if Windows reduces animations.",
+  },
+  {
+    id: "off",
+    name: "No animations",
+    description: "Turn style animations off everywhere.",
+  },
+] as const;
+
+type MotionPreference = (typeof motionPreferences)[number]["id"];
 
 const filterPresets = {
   Images: ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff"],
@@ -87,6 +182,15 @@ function formatBytes(bytes: number) {
   return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[unit]}`;
 }
 
+function formatDuration(milliseconds: number) {
+  if (milliseconds <= 0) return "--";
+  if (milliseconds < 1000) return `${Math.round(milliseconds)} ms`;
+  const seconds = milliseconds / 1000;
+  if (seconds < 60) return `${seconds.toFixed(2)} s`;
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}m ${(seconds % 60).toFixed(1)}s`;
+}
+
 function isImageFile(file: DuplicateFile) {
   return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file.name);
 }
@@ -99,11 +203,45 @@ function folderFromPath(filePath: string) {
   return separatorIndex > 0 ? filePath.slice(0, separatorIndex) : filePath;
 }
 
+function isPathInsideFolder(path: string, folder: string) {
+  const normalize = (value: string) =>
+    value
+      .replace(/[\\/]+/g, "\\")
+      .replace(/\\+$/, "")
+      .toLowerCase();
+  const normalizedPath = normalize(path);
+  const normalizedFolder = normalize(folder);
+  return (
+    normalizedPath === normalizedFolder ||
+    normalizedPath.startsWith(`${normalizedFolder}\\`)
+  );
+}
+
 function loadItemsPerPage() {
   const savedValue = Number(
     window.localStorage.getItem("duplicate-finder.items-per-page"),
   );
   return [10, 20, 50].includes(savedValue) ? savedValue : 10;
+}
+
+function loadMatchMode(): MatchMode {
+  return window.localStorage.getItem("duplicate-finder.match-mode") ===
+    "filename"
+    ? "filename"
+    : "content";
+}
+
+function loadUiTheme(): UiTheme {
+  const savedTheme = window.localStorage.getItem("duplicate-finder.theme");
+  return uiThemes.find((theme) => theme.id === savedTheme)?.id ?? "classic";
+}
+
+function loadMotionPreference(): MotionPreference {
+  const saved = window.localStorage.getItem("duplicate-finder.motion");
+  return (
+    motionPreferences.find((preference) => preference.id === saved)?.id ??
+    "system"
+  );
 }
 
 function loadSavedGroups() {
@@ -139,6 +277,22 @@ function loadSavedGroups() {
   }
 }
 
+function loadSavedScannedFolders(fallback: string[]) {
+  try {
+    const savedFolders = window.localStorage.getItem(
+      "duplicate-finder.scanned-folders",
+    );
+    if (!savedFolders) return fallback;
+    const parsedFolders: unknown = JSON.parse(savedFolders);
+    return Array.isArray(parsedFolders) &&
+      parsedFolders.every((folder) => typeof folder === "string")
+      ? parsedFolders
+      : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function App() {
   const [folders, setFolders] = useState<string[]>(() => {
     try {
@@ -156,7 +310,11 @@ function App() {
       return [];
     }
   });
+  const [scannedFolders, setScannedFolders] = useState<string[]>(() =>
+    loadSavedScannedFolders(folders),
+  );
   const [fileExtensions, setFileExtensions] = useState("");
+  const [matchMode, setMatchMode] = useState<MatchMode>(loadMatchMode);
   const [folderInputs, setFolderInputs] = useState<string[]>([""]);
   const [activeFilterPresets, setActiveFilterPresets] = useState<string[]>([]);
   const [itemsPerPage, setItemsPerPage] = useState(loadItemsPerPage);
@@ -175,24 +333,41 @@ function App() {
     () =>
       Number(window.localStorage.getItem("duplicate-finder.total-size")) || 0,
   );
+  const [totalScanTimeMs, setTotalScanTimeMs] = useState(() => {
+    const savedValue = Number(
+      window.localStorage.getItem("duplicate-finder.scan-time-ms"),
+    );
+    return Number.isFinite(savedValue) && savedValue > 0 ? savedValue : 0;
+  });
   const [selected, setSelected] = useState<string[]>([]);
-  const [deleteAllGroups, setDeleteAllGroups] = useState<string[]>([]);
+  const [deleteAllGroup, setDeleteAllGroup] = useState<string | null>(null);
   const [keptFiles, setKeptFiles] = useState<Record<string, string>>({});
   const [previewPath, setPreviewPath] = useState("");
   const [previewError, setPreviewError] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const [moveDestination, setMoveDestination] = useState("");
+  const [moveError, setMoveError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isScanLocationsCollapsed, setIsScanLocationsCollapsed] = useState(() =>
     Boolean(loadSavedGroups()?.length),
   );
   const [activeResultsTab, setActiveResultsTab] =
     useState<ResultsTab>("results");
+  const [moveSource, setMoveSource] = useState<MoveSource>("files");
   const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
   const [folderOrder, setFolderOrder] = useState<string[]>([]);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [uiTheme, setUiTheme] = useState<UiTheme>(loadUiTheme);
+  const [motionPreference, setMotionPreference] =
+    useState<MotionPreference>(loadMotionPreference);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewAspectRatio, setPreviewAspectRatio] = useState(1);
   const [status, setStatus] = useState("Demo results loaded");
   const appVersion = __APP_VERSION__;
+  const isDeleteAllMode = deleteAllGroup !== null;
 
   const duplicateCount = groups.reduce(
     (count, group) => count + group.files.length - 1,
@@ -203,7 +378,7 @@ function App() {
       total +
       group.files
         .filter((file) =>
-          deleteAllGroups.includes(group.hash)
+          deleteAllGroup === group.hash
             ? true
             : file.path !== (keptFiles[group.hash] ?? group.files[0].path),
         )
@@ -225,7 +400,7 @@ function App() {
               .reduce((sum, file) => sum + file.size, 0),
           0,
         ),
-    [groups, selected, deleteAllGroups, keptFiles],
+    [groups, selected, keptFiles],
   );
   const totalPages = Math.max(1, Math.ceil(groups.length / itemsPerPage));
   const visibleGroups = groups.slice(
@@ -292,6 +467,13 @@ function App() {
   }, [folders]);
 
   useEffect(() => {
+    window.localStorage.setItem(
+      "duplicate-finder.scanned-folders",
+      JSON.stringify(scannedFolders),
+    );
+  }, [scannedFolders]);
+
+  useEffect(() => {
     if (!hasSavedScanResults) return;
     window.localStorage.setItem(
       "duplicate-finder.groups",
@@ -309,7 +491,16 @@ function App() {
       "duplicate-finder.total-size",
       String(totalSizeScanned),
     );
-  }, [hasSavedScanResults, totalFilesScanned, totalSizeScanned]);
+    window.localStorage.setItem(
+      "duplicate-finder.scan-time-ms",
+      String(totalScanTimeMs),
+    );
+  }, [
+    hasSavedScanResults,
+    totalFilesScanned,
+    totalSizeScanned,
+    totalScanTimeMs,
+  ]);
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -319,8 +510,31 @@ function App() {
   }, [itemsPerPage]);
 
   useEffect(() => {
+    window.localStorage.setItem("duplicate-finder.match-mode", matchMode);
+  }, [matchMode]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = uiTheme;
+    window.localStorage.setItem("duplicate-finder.theme", uiTheme);
+  }, [uiTheme]);
+
+  useEffect(() => {
+    document.documentElement.dataset.motion = motionPreference;
+    window.localStorage.setItem("duplicate-finder.motion", motionPreference);
+  }, [motionPreference]);
+
+  useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (!isPreviewOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsPreviewOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isPreviewOpen]);
 
   useEffect(() => {
     if (!previewPath && groups[0]?.files[0]) {
@@ -347,6 +561,21 @@ function App() {
       ...newFolders.filter((path) => !current.includes(path)),
     ]);
     setStatus("Folders ready to scan");
+  }
+
+  async function chooseMoveDestination() {
+    try {
+      const chosen = await open({
+        directory: true,
+        multiple: false,
+        title: "Choose a destination folder",
+      });
+      if (typeof chosen === "string") setMoveDestination(chosen);
+    } catch {
+      setMoveError(
+        "Choosing a destination folder is available in the desktop app.",
+      );
+    }
   }
 
   function updateFolderInput(index: number, value: string) {
@@ -377,14 +606,16 @@ function App() {
 
   function clearFolders() {
     setFolders([]);
+    setScannedFolders([]);
     setFolderInputs([""]);
     setGroups([]);
     setHasSavedScanResults(true);
     setTotalFilesScanned(0);
     setTotalSizeScanned(0);
+    setTotalScanTimeMs(0);
     setSelected([]);
     setSelectedFolders([]);
-    setDeleteAllGroups([]);
+    setDeleteAllGroup(null);
     setKeptFiles({});
     setPreviewPath("");
     setPreviewError(false);
@@ -419,18 +650,22 @@ function App() {
     }
     setIsScanning(true);
     setStatus("Scanning files...");
+    const scanStartedAt = performance.now();
     try {
       const result = await invoke<ScanResult>("scan_directory", {
         paths: folders,
         extensions: normalizedExtensions(),
+        matchByFilename: matchMode === "filename",
       });
+      setTotalScanTimeMs(Math.max(performance.now() - scanStartedAt, 1));
       setGroups(result.groups);
+      setScannedFolders(folders);
       setHasSavedScanResults(true);
       setTotalFilesScanned(result.totalFiles);
       setTotalSizeScanned(result.totalSize);
       setSelected([]);
       setSelectedFolders([]);
-      setDeleteAllGroups([]);
+      setDeleteAllGroup(null);
       setKeptFiles({});
       setPreviewPath(result.groups[0]?.files[0]?.path ?? "");
       setPreviewError(false);
@@ -440,12 +675,14 @@ function App() {
       setIsScanLocationsCollapsed(result.groups.length > 0);
       setCurrentPage(1);
     } catch {
+      setTotalScanTimeMs(0);
       setGroups(demoGroups);
+      setScannedFolders([]);
       setTotalFilesScanned(0);
       setTotalSizeScanned(0);
       setSelected([]);
       setSelectedFolders([]);
-      setDeleteAllGroups([]);
+      setDeleteAllGroup(null);
       setKeptFiles({});
       setPreviewPath(demoGroups[0].files[0].path);
       setPreviewError(false);
@@ -460,11 +697,24 @@ function App() {
   async function deleteSelectedFiles() {
     const groupsToDelete: DeleteGroup[] = groups
       .filter((group) => selected.includes(group.hash))
-      .map((group) => ({
-        files: group.files.map((file) => file.path),
-        keptFile: keptFiles[group.hash] ?? group.files[0].path,
-        deleteAll: deleteAllGroups.includes(group.hash),
-      }));
+      .map((group) => {
+        const keptFile =
+          group.files.find(
+            (file) =>
+              file.path === (keptFiles[group.hash] ?? group.files[0].path),
+          ) ?? group.files[0];
+        return {
+          files: group.files.map((file) => ({
+            path: file.path,
+            expectedHash: file.contentHash ?? group.hash,
+          })),
+          keptFile: {
+            path: keptFile.path,
+            expectedHash: keptFile.contentHash ?? group.hash,
+          },
+          deleteAll: false,
+        };
+      });
     if (!groupsToDelete.length) return;
 
     setIsDeleting(true);
@@ -477,7 +727,6 @@ function App() {
         current.filter((group) => !selected.includes(group.hash)),
       );
       setSelected([]);
-      setDeleteAllGroups([]);
       setKeptFiles({});
       setStatus(
         `${deletedCount} duplicate file${deletedCount === 1 ? "" : "s"} deleted`,
@@ -487,6 +736,92 @@ function App() {
       setStatus("Delete aborted");
     } finally {
       setIsDeleting(false);
+    }
+  }
+
+  async function deleteAllCopiesInGroup(group: DuplicateGroup) {
+    const keptFile = group.files[0];
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const deletedCount = await invoke<number>("delete_duplicate_files", {
+        groups: [
+          {
+            files: group.files.map((file) => ({
+              path: file.path,
+              expectedHash: file.contentHash ?? group.hash,
+            })),
+            keptFile: {
+              path: keptFile.path,
+              expectedHash: keptFile.contentHash ?? group.hash,
+            },
+            deleteAll: true,
+          } satisfies DeleteGroup,
+        ],
+      });
+      const deletedPaths = new Set(group.files.map((file) => file.path));
+      setGroups((current) =>
+        current.filter((item) => item.hash !== group.hash),
+      );
+      setSelected((current) => current.filter((hash) => hash !== group.hash));
+      setKeptFiles(({ [group.hash]: _removed, ...rest }) => rest);
+      if (deletedPaths.has(previewPath)) {
+        setPreviewPath("");
+        setPreviewError(false);
+      }
+      setStatus(
+        `${deletedCount} file${deletedCount === 1 ? "" : "s"} deleted (all copies)`,
+      );
+    } catch (error) {
+      setDeleteError(String(error));
+      setStatus("Delete aborted");
+    } finally {
+      setDeleteAllGroup(null);
+      setIsDeleting(false);
+    }
+  }
+
+  async function moveSelectedDuplicates() {
+    if (
+      !moveDestination ||
+      moveDestinationInsideScannedFolder ||
+      !moveCandidateFiles.length
+    ) {
+      return;
+    }
+    setIsMoving(true);
+    setMoveError(null);
+    try {
+      const movedFiles = await invoke<MoveResult[]>("move_duplicate_files", {
+        files: moveCandidateFiles.map(
+          ({ path, expectedHash }): MoveFileInput => ({ path, expectedHash }),
+        ),
+        destination: moveDestination,
+        scannedFolders,
+      });
+      const destinations = new Map(
+        movedFiles.map((file) => [file.source, file.destination]),
+      );
+      setGroups((current) =>
+        current.map((group) => ({
+          ...group,
+          files: group.files.map((file) => {
+            const destination = destinations.get(file.path);
+            return destination ? { ...file, path: destination } : file;
+          }),
+        })),
+      );
+      setPreviewPath((current) => destinations.get(current) ?? current);
+      setSelected([]);
+      setSelectedFolders([]);
+      setStatus(
+        `${movedFiles.length} duplicate ${movedFiles.length === 1 ? "copy" : "copies"} moved`,
+      );
+    } catch (error) {
+      setMoveError(String(error));
+      setStatus("Move aborted");
+    } finally {
+      setIsMoving(false);
     }
   }
 
@@ -517,12 +852,19 @@ function App() {
         if (!keptFile) return null;
         const filesToDelete = filesByFolderOrder
           .filter((file) => file.path !== keptFile)
-          .reverse()
-          .map((file) => file.path);
+          .reverse();
         if (!filesToDelete.length) return null;
+        const keptFileDetails =
+          group.files.find((file) => file.path === keptFile) ?? group.files[0];
         return {
-          files: filesToDelete,
-          keptFile,
+          files: filesToDelete.map((file) => ({
+            path: file.path,
+            expectedHash: file.contentHash ?? group.hash,
+          })),
+          keptFile: {
+            path: keptFileDetails.path,
+            expectedHash: keptFileDetails.contentHash ?? group.hash,
+          },
           deleteAll: false,
         };
       })
@@ -536,7 +878,7 @@ function App() {
         groups: groupsToDelete,
       });
       const deletedPaths = new Set(
-        groupsToDelete.flatMap((group) => group.files),
+        groupsToDelete.flatMap((group) => group.files.map((file) => file.path)),
       );
       setGroups((current) =>
         current
@@ -548,7 +890,6 @@ function App() {
       );
       setSelectedFolders([]);
       setSelected([]);
-      setDeleteAllGroups([]);
       setKeptFiles({});
       if (deletedPaths.has(previewPath)) {
         setPreviewPath("");
@@ -568,6 +909,78 @@ function App() {
   const previewFile = groups
     .flatMap((group) => group.files)
     .find((file) => file.path === previewPath);
+  const previewGroupImages =
+    groups
+      .find((group) => group.files.some((file) => file.path === previewPath))
+      ?.files.filter(isImageFile) ?? [];
+  const previewImageIndex = previewGroupImages.findIndex(
+    (file) => file.path === previewPath,
+  );
+
+  function cyclePreview(direction: -1 | 1) {
+    const nextImage = previewGroupImages[previewImageIndex + direction];
+    if (previewImageIndex < 0 || !nextImage) return;
+    setPreviewPath(nextImage.path);
+    setPreviewError(false);
+  }
+
+  useEffect(() => {
+    if (!isPreviewOpen) return;
+    const handleArrowKeys = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") cyclePreview(-1);
+      if (event.key === "ArrowRight") cyclePreview(1);
+    };
+    window.addEventListener("keydown", handleArrowKeys);
+    return () => window.removeEventListener("keydown", handleArrowKeys);
+  });
+  const selectedMoveFiles: MoveCandidateFile[] = groups
+    .filter((group) => selected.includes(group.hash))
+    .flatMap((group) => {
+      const keptFile = keptFiles[group.hash] ?? group.files[0].path;
+      return group.files
+        .filter((file) => file.path !== keptFile)
+        .map((file) => ({
+          ...file,
+          expectedHash: file.contentHash ?? group.hash,
+        }));
+    });
+  const selectedFolderMoveFiles: MoveCandidateFile[] = (() => {
+    const selectedFolderOrder = orderedDuplicateFolders
+      .map((folder) => folder.path)
+      .filter((path) => selectedFolders.includes(path));
+    const folderPosition = new Map(
+      selectedFolderOrder.map((path, index) => [path, index]),
+    );
+    return groups.flatMap((group) => {
+      const filesInSelectedFolders = group.files.filter((file) =>
+        folderPosition.has(folderFromPath(file.path)),
+      );
+      if (!filesInSelectedFolders.length) return [];
+      const filesInUnselectedFolders = group.files.filter(
+        (file) => !folderPosition.has(folderFromPath(file.path)),
+      );
+      const filesByFolderOrder = filesInSelectedFolders.sort(
+        (left, right) =>
+          folderPosition.get(folderFromPath(left.path))! -
+          folderPosition.get(folderFromPath(right.path))!,
+      );
+      const keptFile =
+        filesInUnselectedFolders[0]?.path ?? filesByFolderOrder[0]?.path;
+      return filesByFolderOrder
+        .filter((file) => file.path !== keptFile)
+        .map((file) => ({
+          ...file,
+          expectedHash: file.contentHash ?? group.hash,
+        }));
+    });
+  })();
+  const moveCandidateFiles =
+    moveSource === "files" ? selectedMoveFiles : selectedFolderMoveFiles;
+  const filesPerSecond =
+    totalScanTimeMs > 0 ? totalFilesScanned / (totalScanTimeMs / 1000) : 0;
+  const moveDestinationInsideScannedFolder = scannedFolders.some((folder) =>
+    isPathInsideFolder(moveDestination, folder),
+  );
   const previewSource = previewPath.startsWith("/test-images/")
     ? previewPath
     : convertFileSrc(previewPath);
@@ -591,13 +1004,19 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
-      <header className="topbar">
+    <main className={`app-shell ${isDeleteAllMode ? "delete-all-mode" : ""}`}>
+      <header className="topbar locked-region" inert={isDeleteAllMode}>
         <div className="brand">
           <span className="brand-mark">DF</span>
           <span>DuplicateFinder</span>
         </div>
         <div className="topbar-actions">
+          <button
+            className="about-button"
+            onClick={() => setIsSettingsOpen(true)}
+            type="button">
+            Settings
+          </button>
           <button
             className="about-button"
             onClick={() => setIsAboutOpen(true)}
@@ -606,6 +1025,73 @@ function App() {
           </button>
         </div>
       </header>
+
+      {isSettingsOpen && (
+        <div
+          className="about-backdrop"
+          role="presentation"
+          onClick={() => setIsSettingsOpen(false)}>
+          <section
+            className="about-dialog settings-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-title"
+            onClick={(event) => event.stopPropagation()}>
+            <div className="about-dialog-heading">
+              <p className="eyebrow">SETTINGS</p>
+              <button
+                className="about-close"
+                onClick={() => setIsSettingsOpen(false)}
+                aria-label="Close settings"
+                type="button">
+                ×
+              </button>
+            </div>
+            <h2 id="settings-title">Appearance</h2>
+            <fieldset className="theme-options">
+              <legend>Interface style</legend>
+              {uiThemes.map((theme) => (
+                <label
+                  className={`theme-option ${uiTheme === theme.id ? "active" : ""}`}
+                  key={theme.id}>
+                  <input
+                    type="radio"
+                    name="ui-theme"
+                    value={theme.id}
+                    checked={uiTheme === theme.id}
+                    onChange={() => setUiTheme(theme.id)}
+                  />
+                  <span className={`theme-swatch swatch-${theme.id}`} />
+                  <span className="theme-option-text">
+                    <strong>{theme.name}</strong>
+                    <span>{theme.description}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+            <fieldset className="theme-options motion-options">
+              <legend>Animations</legend>
+              {motionPreferences.map((preference) => (
+                <label
+                  className={`theme-option compact ${motionPreference === preference.id ? "active" : ""}`}
+                  key={preference.id}>
+                  <input
+                    type="radio"
+                    name="motion-preference"
+                    value={preference.id}
+                    checked={motionPreference === preference.id}
+                    onChange={() => setMotionPreference(preference.id)}
+                  />
+                  <span className="theme-option-text">
+                    <strong>{preference.name}</strong>
+                    <span>{preference.description}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          </section>
+        </div>
+      )}
 
       {isAboutOpen && (
         <div
@@ -638,11 +1124,72 @@ function App() {
               with confidence.
             </p>
             <span className="about-note">
-              DuplicateFinder compares file size and content hash locally. Your
+              DuplicateFinder matches by filename or file content locally. Your
               files stay on this device.
             </span>
             <div className="about-version">Version {appVersion}</div>
           </section>
+        </div>
+      )}
+
+      {isPreviewOpen && previewFile && isImageFile(previewFile) && (
+        <div
+          className="about-backdrop preview-modal-backdrop"
+          role="presentation"
+          onClick={() => setIsPreviewOpen(false)}>
+          <figure
+            className="preview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Preview of ${previewFile.name}`}
+            onClick={(event) => event.stopPropagation()}>
+            <img
+              src={previewSource}
+              alt={`Preview of ${previewFile.name}`}
+              style={{
+                aspectRatio: previewAspectRatio,
+                width: `min(90vw, calc(90vh * ${previewAspectRatio}))`,
+              }}
+              onLoad={(event) => {
+                const { naturalWidth, naturalHeight } = event.currentTarget;
+                if (naturalWidth && naturalHeight) {
+                  setPreviewAspectRatio(naturalWidth / naturalHeight);
+                }
+              }}
+            />
+            <button
+              className="preview-modal-close"
+              onClick={() => setIsPreviewOpen(false)}
+              aria-label="Close preview"
+              autoFocus
+              type="button">
+              ×
+            </button>
+            {previewGroupImages.length > 1 && (
+              <>
+                <button
+                  className="preview-modal-nav prev"
+                  onClick={() => cyclePreview(-1)}
+                  disabled={previewImageIndex <= 0}
+                  aria-label="Previous image in group"
+                  type="button">
+                  ‹
+                </button>
+                <button
+                  className="preview-modal-nav next"
+                  onClick={() => cyclePreview(1)}
+                  disabled={previewImageIndex >= previewGroupImages.length - 1}
+                  aria-label="Next image in group"
+                  type="button">
+                  ›
+                </button>
+                <figcaption className="preview-modal-caption">
+                  {previewImageIndex + 1} / {previewGroupImages.length} ·{" "}
+                  <span title={previewPath}>{previewPath}</span>
+                </figcaption>
+              </>
+            )}
+          </figure>
         </div>
       )}
 
@@ -683,7 +1230,7 @@ function App() {
         </div>
       )}
 
-      <section className="scan-panel">
+      <section className="scan-panel locked-region" inert={isDeleteAllMode}>
         <button
           className="scan-panel-header"
           onClick={() => setIsScanLocationsCollapsed((collapsed) => !collapsed)}
@@ -805,6 +1352,35 @@ function App() {
                 })}
               </div>
             </div>
+            <div className="match-mode-row">
+              <div>
+                <strong>Match duplicates by</strong>
+                <span>
+                  {matchMode === "content"
+                    ? "Compare file contents and sizes."
+                    : "Group files with the same filename, case-insensitively, even if their contents differ."}
+                </span>
+              </div>
+              <div
+                className="match-mode-control"
+                role="group"
+                aria-label="Duplicate matching method">
+                <button
+                  className={matchMode === "content" ? "active" : ""}
+                  onClick={() => setMatchMode("content")}
+                  aria-pressed={matchMode === "content"}
+                  type="button">
+                  Content
+                </button>
+                <button
+                  className={matchMode === "filename" ? "active" : ""}
+                  onClick={() => setMatchMode("filename")}
+                  aria-pressed={matchMode === "filename"}
+                  type="button">
+                  Filename
+                </button>
+              </div>
+            </div>
             <div className="scan-action-row">
               <button
                 className="scan-button"
@@ -819,11 +1395,25 @@ function App() {
         )}
       </section>
 
-      <section className="summary-grid">
+      <section className="summary-grid locked-region" inert={isDeleteAllMode}>
         <div>
           <span>Files scanned</span>
           <strong>{totalFilesScanned.toLocaleString()}</strong>
           <small>matching the current filter</small>
+        </div>
+        <div>
+          <span>Total scan time</span>
+          <strong>{formatDuration(totalScanTimeMs)}</strong>
+          <small>last completed scan</small>
+        </div>
+        <div>
+          <span>Files per second</span>
+          <strong>
+            {totalScanTimeMs > 0
+              ? Math.round(filesPerSecond).toLocaleString()
+              : "--"}
+          </strong>
+          <small>average scan rate</small>
         </div>
         <div>
           <span>Total scanned size</span>
@@ -849,7 +1439,8 @@ function App() {
 
       <section className="results-section">
         <div
-          className="results-tabs"
+          className="results-tabs locked-region"
+          inert={isDeleteAllMode}
           role="tablist"
           aria-label="Duplicate results views">
           <button
@@ -868,14 +1459,24 @@ function App() {
             type="button">
             Folder
           </button>
+          <button
+            className={activeResultsTab === "move" ? "active" : ""}
+            onClick={() => setActiveResultsTab("move")}
+            role="tab"
+            aria-selected={activeResultsTab === "move"}
+            type="button">
+            Move
+          </button>
         </div>
-        <div className="section-heading">
+        <div className="section-heading locked-region" inert={isDeleteAllMode}>
           <div>
             <p className="eyebrow">REVIEW RESULTS</p>
             <h2>
               {activeResultsTab === "results"
                 ? "Duplicate groups"
-                : "Folders with duplicates"}
+                : activeResultsTab === "folders"
+                  ? "Folders with duplicates"
+                  : "Move duplicate copies"}
             </h2>
           </div>
           {activeResultsTab === "results" && (
@@ -896,7 +1497,97 @@ function App() {
             </div>
           )}
         </div>
-        {activeResultsTab === "folders" ? (
+        {activeResultsTab === "move" ? (
+          <div className="move-panel" role="tabpanel">
+            <div className="move-destination-row">
+              <div>
+                <strong>Destination folder</strong>
+                <span>
+                  Kept files stay put; moved files keep folders below their
+                  common parent.
+                </span>
+              </div>
+              <div className="move-destination-control">
+                <input
+                  value={moveDestination}
+                  placeholder="Choose a destination folder"
+                  aria-label="Move destination folder"
+                  readOnly
+                />
+                <button
+                  className="browse-button"
+                  onClick={() => void chooseMoveDestination()}
+                  disabled={isMoving}
+                  type="button">
+                  Browse
+                </button>
+              </div>
+            </div>
+            {moveDestinationInsideScannedFolder && (
+              <p className="move-error" role="alert">
+                Choose a destination outside every folder searched for
+                duplicates.
+              </p>
+            )}
+            {moveError && !moveDestinationInsideScannedFolder && (
+              <p className="move-error" role="alert">
+                {moveError}
+              </p>
+            )}
+            <div
+              className="move-source-control"
+              role="group"
+              aria-label="Move selection source">
+              <button
+                className={moveSource === "files" ? "active" : ""}
+                onClick={() => setMoveSource("files")}
+                aria-pressed={moveSource === "files"}
+                type="button">
+                Files ({selectedMoveFiles.length})
+              </button>
+              <button
+                className={moveSource === "folders" ? "active" : ""}
+                onClick={() => setMoveSource("folders")}
+                aria-pressed={moveSource === "folders"}
+                type="button">
+                Folders ({selectedFolderMoveFiles.length})
+              </button>
+            </div>
+            <div className="move-selection-heading">
+              <strong>
+                {moveCandidateFiles.length} duplicate copies selected
+              </strong>
+              <span>
+                {moveSource === "files"
+                  ? "Select groups in Files to choose which copies to move."
+                  : "Select folders in Folder. Copies outside the selection stay put; folder order chooses a copy to keep when all copies are selected."}
+              </span>
+            </div>
+            {moveCandidateFiles.length ? (
+              <div className="move-file-list">
+                {moveCandidateFiles.map((file) => (
+                  <div className="move-file-row" key={file.path}>
+                    <strong>{file.name}</strong>
+                    <span title={file.path}>{file.path}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <strong>
+                  {moveSource === "files"
+                    ? "No duplicate copies selected"
+                    : "No duplicate copies selected from folders"}
+                </strong>
+                <span>
+                  {moveSource === "files"
+                    ? "Select duplicate groups in Files to move their extra copies."
+                    : "Select folders in Folder to move duplicate copies from those locations."}
+                </span>
+              </div>
+            )}
+          </div>
+        ) : activeResultsTab === "folders" ? (
           <div className="folder-results" role="tabpanel">
             {duplicateFolders.length > 0 && (
               <label className="folder-select-all">
@@ -987,7 +1678,8 @@ function App() {
               ) : (
                 visibleGroups.map((group, index) => {
                   const isSelected = selected.includes(group.hash);
-                  const isDeleteAll = deleteAllGroups.includes(group.hash);
+                  const isDeleteAll = deleteAllGroup === group.hash;
+                  const isLockedGroup = isDeleteAllMode && !isDeleteAll;
                   const keptFile = keptFiles[group.hash] ?? group.files[0].path;
                   const keptFileDetails =
                     group.files.find((file) => file.path === keptFile) ??
@@ -997,16 +1689,13 @@ function App() {
                     .reduce((total, file) => total + file.size, 0);
                   return (
                     <article
-                      className={`duplicate-group ${isSelected ? "selected" : ""} ${isDeleteAll ? "delete-all-selected" : ""}`}
+                      className={`duplicate-group ${isSelected ? "selected" : ""} ${isDeleteAll ? "delete-all-selected" : ""} ${isLockedGroup ? "locked-region" : ""}`}
+                      inert={isLockedGroup}
                       key={group.hash}>
                       <button
                         className="group-toggle"
+                        disabled={isDeleteAllMode}
                         onClick={() => {
-                          if (isSelected) {
-                            setDeleteAllGroups((current) =>
-                              current.filter((hash) => hash !== group.hash),
-                            );
-                          }
                           setSelected((current) =>
                             isSelected
                               ? current.filter((hash) => hash !== group.hash)
@@ -1034,29 +1723,27 @@ function App() {
                             <input
                               type="checkbox"
                               checked={isDeleteAll}
-                              onChange={(event) => {
-                                const checked = event.currentTarget.checked;
-                                setDeleteAllGroups((current) =>
-                                  checked
-                                    ? [...current, group.hash]
-                                    : current.filter(
-                                        (hash) => hash !== group.hash,
-                                      ),
-                                );
-                                setSelected((current) =>
-                                  checked
-                                    ? current.includes(group.hash)
-                                      ? current
-                                      : [...current, group.hash]
-                                    : current.filter(
-                                        (hash) => hash !== group.hash,
-                                      ),
-                                );
-                              }}
+                              disabled={isDeleting || isScanning}
+                              onChange={(event) =>
+                                setDeleteAllGroup(
+                                  event.currentTarget.checked
+                                    ? group.hash
+                                    : null,
+                                )
+                              }
                               onClick={(event) => event.stopPropagation()}
                             />
                             <span>Delete all copies</span>
                           </label>
+                          <button
+                            className="group-delete-button"
+                            disabled={!isDeleteAll || isDeleting || isScanning}
+                            onClick={() => void deleteAllCopiesInGroup(group)}
+                            type="button">
+                            {isDeleteAll && isDeleting
+                              ? "Deleting..."
+                              : "Delete"}
+                          </button>
                         </div>
                         {isDeleteAll && (
                           <p className="delete-all-warning">
@@ -1064,7 +1751,9 @@ function App() {
                             deleted.
                           </p>
                         )}
-                        <div className="file-list">
+                        <div
+                          className={`file-list ${isDeleteAllMode ? "locked-region" : ""}`}
+                          inert={isDeleteAllMode}>
                           {group.files.map((file) => (
                             <div
                               className={`file-row ${previewPath === file.path ? "preview-selected" : ""}`}
@@ -1117,20 +1806,27 @@ function App() {
                 })
               )}
             </div>
-            <aside className="preview-pane">
+            <aside
+              className="preview-pane locked-region"
+              inert={isDeleteAllMode}>
               <div className="preview-heading">
                 <p className="eyebrow">PREVIEW</p>
                 {previewFile && <span>{previewFile.name}</span>}
               </div>
               {previewFile && isImageFile(previewFile) && !previewError ? (
-                <div className="preview-frame">
+                <button
+                  className="preview-frame"
+                  onClick={() => setIsPreviewOpen(true)}
+                  aria-label={`Open larger preview of ${previewFile.name}`}
+                  title="Click to enlarge"
+                  type="button">
                   <img
                     key={previewPath}
                     src={previewSource}
                     alt={`Preview of ${previewFile.name}`}
                     onError={() => setPreviewError(true)}
                   />
-                </div>
+                </button>
               ) : (
                 <div className="preview-empty">
                   <span className="preview-icon">□</span>
@@ -1146,7 +1842,10 @@ function App() {
           </div>
         )}
         {activeResultsTab === "results" && groups.length > 0 && (
-          <div className="pagination" aria-label="Duplicate group pages">
+          <div
+            className="pagination locked-region"
+            inert={isDeleteAllMode}
+            aria-label="Duplicate group pages">
             <button
               type="button"
               onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
@@ -1167,14 +1866,16 @@ function App() {
           </div>
         )}
         {activeResultsTab === "results" && (
-          <div className="action-bar">
+          <div className="action-bar locked-region" inert={isDeleteAllMode}>
             <span>
               <b>{selected.length}</b> groups selected ·{" "}
               <b>{formatBytes(selectedBytes)}</b> to reclaim
             </span>
             <button
               className="delete-button"
-              disabled={!selected.length || isDeleting || isScanning}
+              disabled={
+                !selected.length || isDeleting || isScanning || isDeleteAllMode
+              }
               onClick={() => void deleteSelectedFiles()}>
               {isDeleting ? "Checking files..." : "Delete selected copies"}{" "}
               <span>⌫</span>
@@ -1193,6 +1894,28 @@ function App() {
               {isDeleting
                 ? "Checking files..."
                 : "Delete duplicates from selected folders"}
+            </button>
+          </div>
+        )}
+        {activeResultsTab === "move" && (
+          <div className="action-bar">
+            <span>
+              <b>{moveCandidateFiles.length}</b> copies will move
+            </span>
+            <button
+              className="delete-button move-button"
+              disabled={
+                !moveCandidateFiles.length ||
+                !moveDestination ||
+                moveDestinationInsideScannedFolder ||
+                isMoving ||
+                isDeleting ||
+                isScanning
+              }
+              onClick={() => void moveSelectedDuplicates()}
+              type="button">
+              {isMoving ? "Moving files..." : "Move selected copies"}
+              <span>→</span>
             </button>
           </div>
         )}
