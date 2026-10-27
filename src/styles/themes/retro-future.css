@@ -9,6 +9,27 @@
   color: var(--rf-green);
   background: radial-gradient(ellipse at center, #0a2b17 0%, #020c06 80%) fixed;
 }
+[data-theme="retro-future"] .retro-future-tooltip {
+  position: fixed;
+  z-index: 10000;
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 6px 9px;
+  border: 1px solid var(--rf-green);
+  background: #000 !important;
+  color: var(--rf-green) !important;
+  box-shadow: 0 0 10px rgba(60, 255, 143, 0.3);
+  font:
+    12px "Share Tech Mono",
+    "DM Mono",
+    monospace;
+  line-height: 1.4;
+  pointer-events: none;
+  text-shadow: var(--rf-glow);
+  overflow-wrap: anywhere;
+}
+.retro-future-tooltip[hidden] {
+  display: none !important;
+}
 [data-theme="retro-future"] body::after {
   position: fixed;
   z-index: 50;
@@ -73,11 +94,86 @@
 [data-theme="retro-future"] .app-shell *::placeholder {
   color: var(--rf-dim) !important;
 }
+[data-theme="retro-future"] .app-shell select {
+  color: var(--rf-green) !important;
+  background-color: #000 !important;
+  color-scheme: dark;
+}
+[data-theme="retro-future"] .app-shell select option,
+[data-theme="retro-future"] .app-shell select optgroup {
+  color: var(--rf-green) !important;
+  background-color: #000 !important;
+}
+[data-theme="retro-future"] .app-shell select option:hover,
+[data-theme="retro-future"] .app-shell select option:checked {
+  color: #021208 !important;
+  background-color: var(--rf-green) !important;
+}
+[data-theme="retro-future"] .app-shell .retro-settings-select {
+  position: relative;
+  min-width: 0;
+}
+[data-theme="retro-future"] .app-shell .retro-settings-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid var(--rf-dim) !important;
+  background-color: #000 !important;
+  color: var(--rf-green) !important;
+  text-align: left;
+  cursor: pointer;
+}
+[data-theme="retro-future"] .app-shell .retro-settings-select-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 2px);
+  right: 0;
+  left: 0;
+  min-width: max-content;
+  overflow: hidden;
+  border: 1px solid var(--rf-green) !important;
+  background-color: #000 !important;
+  color: var(--rf-green) !important;
+  box-shadow: 0 0 12px rgba(60, 255, 143, 0.3) !important;
+}
+[data-theme="retro-future"] .app-shell .retro-settings-select-option {
+  padding: 7px 10px;
+  background-color: #000 !important;
+  color: var(--rf-green) !important;
+  cursor: pointer;
+  white-space: nowrap;
+}
+[data-theme="retro-future"] .app-shell .retro-settings-select-option.active {
+  background-color: var(--rf-green) !important;
+  color: #021208 !important;
+  text-shadow: none;
+}
 [data-theme="retro-future"] .app-shell :focus-visible {
   outline: 2px solid var(--rf-green) !important;
   outline-offset: 2px;
 }
-[data-theme="retro-future"] .app-shell input[type="checkbox"],
+[data-theme="retro-future"] .app-shell input[type="checkbox"] {
+  appearance: none;
+  flex: 0 0 16px;
+  width: 16px !important;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--rf-green) !important;
+  background-color: #000 !important;
+  cursor: pointer;
+}
+[data-theme="retro-future"] .app-shell input[type="checkbox"]:checked {
+  background-color: var(--rf-green) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='m2 6 2.5 2.5L10 3' fill='none' stroke='%23021208' stroke-width='2'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 12px;
+}
 [data-theme="retro-future"] .app-shell input[type="radio"] {
   accent-color: var(--rf-green);
 }
@@ -101,6 +197,15 @@
 @keyframes rf-cursor {
   50% {
     opacity: 0;
+  }
+}
+@keyframes rf-warning-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 [data-theme="retro-future"] .app-shell .brand {
@@ -135,6 +240,11 @@
   box-shadow:
     0 0 12px rgba(60, 255, 143, 0.35),
     inset 0 0 12px rgba(60, 255, 143, 0.15) !important;
+}
+[data-theme="retro-future"] .app-shell .group-toggle span {
+  border: 1px solid var(--rf-green) !important;
+  background-color: #000 !important;
+  color: transparent !important;
 }
 /* Pip-Boy style inverted highlight */
 [data-theme="retro-future"] .app-shell .brand-mark,
@@ -179,27 +289,28 @@
 [data-theme="retro-future"] .app-shell .results-tabs button.active::after {
   display: none;
 }
-[data-theme="retro-future"] .app-shell .delete-all-control,
-[data-theme="retro-future"] .app-shell .delete-all-control *,
-[data-theme="retro-future"] .app-shell .delete-all-warning,
 [data-theme="retro-future"] .app-shell .move-error,
-[data-theme="retro-future"] .app-shell .delete-error-dialog h2,
-[data-theme="retro-future"] .app-shell .clear-folders-button,
-[data-theme="retro-future"] .app-shell .remove-folder {
+[data-theme="retro-future"] .app-shell .delete-error-dialog h2 {
   color: var(--rf-amber) !important;
   border-color: var(--rf-amber) !important;
   text-shadow: 0 0 6px rgba(255, 182, 66, 0.55);
 }
+[data-theme="retro-future"] .app-shell .delete-all-warning {
+  color: var(--rf-green) !important;
+  border-color: var(--rf-green) !important;
+  text-shadow: var(--rf-glow);
+  animation: rf-warning-pulse 0.9s ease-in-out infinite;
+}
 [data-theme="retro-future"] .app-shell .delete-all-control input {
-  accent-color: var(--rf-amber);
+  accent-color: var(--rf-green);
 }
 [data-theme="retro-future"] .app-shell .duplicate-group.delete-all-selected {
-  border-color: var(--rf-amber) !important;
-  box-shadow: 0 0 12px rgba(255, 182, 66, 0.35) !important;
+  border-color: var(--rf-green) !important;
+  box-shadow: 0 0 12px rgba(60, 255, 143, 0.35) !important;
 }
 [data-theme="retro-future"] .app-shell .group-delete-button:not(:disabled) {
-  border-color: var(--rf-amber) !important;
-  background-color: var(--rf-amber) !important;
+  border-color: var(--rf-green) !important;
+  background-color: var(--rf-green) !important;
   color: #1a0f00 !important;
   text-shadow: none;
 }
@@ -227,7 +338,17 @@
     h2::after {
     animation: none;
   }
+  :root:not([data-motion="always"])[data-theme="retro-future"]
+    .app-shell
+    .delete-all-warning {
+    animation: none;
+  }
 }
 :root[data-motion="off"][data-theme="retro-future"] .app-shell h2::after {
+  animation: none;
+}
+:root[data-motion="off"][data-theme="retro-future"]
+  .app-shell
+  .delete-all-warning {
   animation: none;
 }

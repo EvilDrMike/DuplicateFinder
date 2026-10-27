@@ -6,7 +6,14 @@ import {
   type MotionPreference,
   type UiTheme,
 } from "../constants";
-import type { DuplicateGroup, MatchMode, MoveSource } from "../types";
+import type {
+  DuplicateGroup,
+  FolderSortBy,
+  GroupSortBy,
+  MatchMode,
+  MoveSource,
+  SortDirection,
+} from "../types";
 
 const prefix = "duplicate-finder.";
 
@@ -17,6 +24,7 @@ export const storageKeys = {
   totalFiles: `${prefix}total-files`,
   totalSize: `${prefix}total-size`,
   scanTimeMs: `${prefix}scan-time-ms`,
+  folderFileCounts: `${prefix}folder-file-counts`,
   settings: `${prefix}settings`,
 } as const;
 
@@ -44,6 +52,18 @@ export function writeJson(key: string, value: unknown) {
 export function readPositiveNumber(key: string) {
   const value = Number(window.localStorage.getItem(key));
   return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+export function readNumberRecord(key: string): Record<string, number> | null {
+  const value = readJson(key);
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record: Record<string, number> = {};
+  for (const [path, count] of Object.entries(value)) {
+    if (typeof count === "number" && Number.isFinite(count) && count >= 0) {
+      record[path] = count;
+    }
+  }
+  return record;
 }
 
 export function writeNumber(key: string, value: number) {
@@ -86,6 +106,10 @@ export type PersistedSettings = {
   motion: MotionPreference;
   matchMode: MatchMode;
   itemsPerPage: number;
+  groupSortBy: GroupSortBy;
+  sortDirection: SortDirection;
+  folderSortBy: FolderSortBy;
+  folderSortDirection: SortDirection;
   fileExtensions: string;
   filterPresets: string[];
   moveDestination: string;
@@ -98,6 +122,10 @@ export const defaultSettings: PersistedSettings = {
   motion: "system",
   matchMode: "content",
   itemsPerPage: 10,
+  groupSortBy: "reclaimable",
+  sortDirection: "descending",
+  folderSortBy: "manual",
+  folderSortDirection: "descending",
   fileExtensions: "",
   filterPresets: [],
   moveDestination: "",
@@ -121,6 +149,31 @@ export function parseSettings(value: unknown): Partial<PersistedSettings> {
     (option) => option === raw.itemsPerPage,
   );
   if (itemsPerPage) settings.itemsPerPage = itemsPerPage;
+  if (
+    raw.groupSortBy === "reclaimable" ||
+    raw.groupSortBy === "copies" ||
+    raw.groupSortBy === "name" ||
+    raw.groupSortBy === "size"
+  ) {
+    settings.groupSortBy = raw.groupSortBy;
+  }
+  if (raw.sortDirection === "ascending" || raw.sortDirection === "descending") {
+    settings.sortDirection = raw.sortDirection;
+  }
+  if (
+    raw.folderSortBy === "manual" ||
+    raw.folderSortBy === "files" ||
+    raw.folderSortBy === "groups" ||
+    raw.folderSortBy === "percentage"
+  ) {
+    settings.folderSortBy = raw.folderSortBy;
+  }
+  if (
+    raw.folderSortDirection === "ascending" ||
+    raw.folderSortDirection === "descending"
+  ) {
+    settings.folderSortDirection = raw.folderSortDirection;
+  }
   if (typeof raw.fileExtensions === "string") {
     settings.fileExtensions = raw.fileExtensions;
   }

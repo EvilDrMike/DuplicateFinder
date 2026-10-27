@@ -13,6 +13,7 @@ import { PreviewModal } from "./components/PreviewModal";
 import { PreviewPane } from "./components/PreviewPane";
 import { ScanPanel } from "./components/ScanPanel";
 import { SettingsDialog } from "./components/SettingsDialog";
+import { SettingsSelect } from "./components/SettingsSelect";
 import { SummaryGrid } from "./components/SummaryGrid";
 import {
   demoGroups,
@@ -21,14 +22,18 @@ import {
   type FilterPreset,
 } from "./constants";
 import { usePersistentState } from "./hooks/usePersistentState";
+import { useRetroFutureTooltips } from "./hooks/useRetroFutureTooltips";
 import { useSettings } from "./hooks/useSettings";
 import { formatBytes, pluralize } from "./lib/format";
 import {
   applyFolderOrder,
+  folderFromPath,
   isImageFile,
   isPathInsideFolder,
   planFolderCleanup,
   selectedFolderPositions,
+  sortDuplicateGroups as sortGroups,
+  sortDuplicateFolders as sortFoldersByCounts,
   summarizeDuplicateFolders,
   toFileInput,
   toMoveCandidate,
@@ -36,6 +41,7 @@ import {
 import {
   isStringArray,
   loadSavedGroups,
+  readNumberRecord,
   readPositiveNumber,
   storageKeys,
   writeJson,
@@ -68,7 +74,12 @@ function App() {
     moveDestination,
     moveSource,
     folderOrder,
+    groupSortBy,
+    sortDirection,
+    folderSortBy,
+    folderSortDirection,
   } = settings;
+  useRetroFutureTooltips(theme === "retro-future");
 
   const [folders, setFolders] = usePersistentState(
     storageKeys.folders,
@@ -96,6 +107,9 @@ function App() {
   );
   const [totalScanTimeMs, setTotalScanTimeMs] = useState(() =>
     readPositiveNumber(storageKeys.scanTimeMs),
+  );
+  const [folderFileCounts, setFolderFileCounts] = useState(() =>
+    readNumberRecord(storageKeys.folderFileCounts),
   );
 
   const [requestedPage, setCurrentPage] = useState(1);
@@ -155,14 +169,33 @@ function App() {
   );
   const totalPages = Math.max(1, Math.ceil(groups.length / itemsPerPage));
   const currentPage = Math.min(requestedPage, totalPages);
-  const visibleGroups = groups.slice(
+  const sortedGroups = useMemo(
+    () => sortGroups(groups, groupSortBy, sortDirection, keptFiles),
+    [groups, groupSortBy, sortDirection, keptFiles],
+  );
+  const visibleGroups = sortedGroups.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
   const orderedFolders = useMemo(
-    () => applyFolderOrder(summarizeDuplicateFolders(groups), folderOrder),
-    [groups, folderOrder],
+    () =>
+      applyFolderOrder(
+        summarizeDuplicateFolders(groups, folderFileCounts ?? {}),
+        folderOrder,
+      ),
+    [groups, folderFileCounts, folderOrder],
+  );
+  const displayedFolders = useMemo(
+    () =>
+      folderSortBy === "manual"
+        ? orderedFolders
+        : sortFoldersByCounts(
+            orderedFolders,
+            folderSortBy,
+            folderSortDirection,
+          ),
+    [orderedFolders, folderSortBy, folderSortDirection],
   );
   const folderPositions = useMemo(
     () => selectedFolderPositions(orderedFolders, selectedFolders),
@@ -219,6 +252,11 @@ function App() {
     totalSizeScanned,
     totalScanTimeMs,
   ]);
+
+  useEffect(() => {
+    if (!hasSavedScanResults || folderFileCounts === null) return;
+    writeJson(storageKeys.folderFileCounts, folderFileCounts);
+  }, [folderFileCounts, hasSavedScanResults]);
 
   function showPreview(file: DuplicateFile) {
     setPreviewPath(file.path);
@@ -296,23 +334,9 @@ function App() {
     );
   }
 
-  function clearFolders() {
+  function clearScanFolders() {
     setFolders([]);
-    setScannedFolders([]);
-    setGroups([]);
-    setHasSavedScanResults(true);
-    setTotalFilesScanned(0);
-    setTotalSizeScanned(0);
-    setTotalScanTimeMs(0);
-    setSelected([]);
-    setSelectedFolders([]);
-    setDeleteAllGroup(null);
-    setKeptFiles({});
-    setPreviewPath("");
-    setPreviewError(false);
-    setIsScanLocationsCollapsed(false);
-    setCurrentPage(1);
-    setStatus("All selected folders cleared");
+    setStatus("Scan folders cleared; previous results kept");
   }
 
   function toggleFilterPreset(preset: string) {
@@ -354,6 +378,7 @@ function App() {
       setHasSavedScanResults(true);
       setTotalFilesScanned(result.totalFiles);
       setTotalSizeScanned(result.totalSize);
+      setFolderFileCounts(result.folderFileCounts ?? {});
       setSelected([]);
       setSelectedFolders([]);
       setDeleteAllGroup(null);
@@ -371,6 +396,21 @@ function App() {
     } finally {
       setIsScanning(false);
     }
+  }
+
+  function decrementScannedFileCounts(paths: string[]) {
+    if (!paths.length) return;
+    setFolderFileCounts((current) => {
+      if (current === null) return current;
+      const next = { ...current };
+      paths.forEach((path) => {
+        const folder = folderFromPath(path);
+        if (typeof next[folder] === "number") {
+          next[folder] = Math.max(0, next[folder] - 1);
+        }
+      });
+      return next;
+    });
   }
 
   /** Runs a delete request, reporting failures in the delete error dialog. */
@@ -405,6 +445,13 @@ function App() {
         };
       });
     await runDelete(groupsToDelete, (deletedCount) => {
+      decrementScannedFileCounts(
+        groupsToDelete.flatMap((group) =>
+          group.files
+            .filter((file) => file.path !== group.keptFile.path)
+            .map((file) => file.path),
+        ),
+      );
       setGroups((current) =>
         current.filter((group) => !selected.includes(group.hash)),
       );
@@ -426,6 +473,7 @@ function App() {
         },
       ],
       (deletedCount) => {
+        decrementScannedFileCounts(group.files.map((file) => file.path));
         setGroups((current) =>
           current.filter((item) => item.hash !== group.hash),
         );
@@ -459,6 +507,7 @@ function App() {
       const deletedPaths = new Set(
         groupsToDelete.flatMap((group) => group.files.map((file) => file.path)),
       );
+      decrementScannedFileCounts([...deletedPaths]);
       setGroups((current) =>
         current
           .map((group) => ({
@@ -499,6 +548,7 @@ function App() {
       const destinations = new Map(
         movedFiles.map((file) => [file.source, file.destination]),
       );
+      decrementScannedFileCounts(movedFiles.map((file) => file.source));
       setGroups((current) =>
         current.map((group) => ({
           ...group,
@@ -533,6 +583,16 @@ function App() {
       paths[targetIndex],
       paths[currentIndex],
     ];
+    updateSettings({ folderOrder: paths });
+  }
+
+  function moveFolderToEdge(path: string, edge: "top" | "bottom") {
+    const paths = orderedFolders.map((folder) => folder.path);
+    const currentIndex = paths.indexOf(path);
+    if (currentIndex < 0) return;
+    paths.splice(currentIndex, 1);
+    if (edge === "top") paths.unshift(path);
+    else paths.push(path);
     updateSettings({ folderOrder: paths });
   }
 
@@ -620,7 +680,7 @@ function App() {
         onAddFolder={addFolder}
         onBrowse={() => void chooseFolders()}
         onRemoveFolder={removeFolder}
-        onClearAll={clearFolders}
+        onClearFolders={clearScanFolders}
         fileExtensions={fileExtensions}
         onFileExtensionsChange={(value) =>
           updateSettings({ fileExtensions: value })
@@ -669,23 +729,131 @@ function App() {
           </div>
           {activeResultsTab === "results" && (
             <div className="results-settings">
-              <label htmlFor="items-per-page">Items per page</label>
-              <select
-                id="items-per-page"
-                value={itemsPerPage}
-                onChange={(event) => {
-                  updateSettings({
-                    itemsPerPage: Number(event.currentTarget.value),
-                  });
-                  setCurrentPage(1);
-                }}>
-                {itemsPerPageOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <span className="sort">Largest first&nbsp; ↓</span>
+              <div className="results-setting-control">
+                <label htmlFor="items-per-page">Items per page</label>
+                <SettingsSelect
+                  id="items-per-page"
+                  label="Items per page"
+                  value={String(itemsPerPage)}
+                  options={itemsPerPageOptions.map((option) => ({
+                    value: String(option),
+                    label: String(option),
+                  }))}
+                  theme={theme}
+                  onChange={(value) => {
+                    updateSettings({
+                      itemsPerPage: Number(value),
+                    });
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+              <div className="results-setting-control">
+                <label htmlFor="group-sort">Sort by</label>
+                <SettingsSelect
+                  id="group-sort"
+                  label="Sort duplicate groups by"
+                  value={groupSortBy}
+                  theme={theme}
+                  options={[
+                    {
+                      value: "reclaimable",
+                      label: "Potential space reclaimed",
+                    },
+                    { value: "copies", label: "Number of copies" },
+                    { value: "name", label: "Filename" },
+                    { value: "size", label: "Total group size" },
+                  ]}
+                  onChange={(value) =>
+                    updateSettings({
+                      groupSortBy: value as typeof groupSortBy,
+                    })
+                  }
+                />
+              </div>
+              <div className="results-setting-control">
+                <label htmlFor="group-sort-direction">Order</label>
+                <SettingsSelect
+                  id="group-sort-direction"
+                  label="Duplicate group sort order"
+                  value={sortDirection}
+                  theme={theme}
+                  options={[
+                    {
+                      value: "descending",
+                      label:
+                        groupSortBy === "name" ? "Z to A" : "Largest first",
+                    },
+                    {
+                      value: "ascending",
+                      label:
+                        groupSortBy === "name" ? "A to Z" : "Smallest first",
+                    },
+                  ]}
+                  onChange={(value) =>
+                    updateSettings({
+                      sortDirection: value as typeof sortDirection,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
+          {activeResultsTab === "folders" && (
+            <div className="results-settings">
+              <div className="results-setting-control">
+                <label htmlFor="folder-sort">Sort by</label>
+                <SettingsSelect
+                  id="folder-sort"
+                  label="Sort folders by"
+                  value={folderSortBy}
+                  theme={theme}
+                  options={[
+                    { value: "manual", label: "Manual order" },
+                    { value: "files", label: "Number of files" },
+                    { value: "groups", label: "Number of groups" },
+                    { value: "percentage", label: "Percentage duplicated" },
+                  ]}
+                  onChange={(value) =>
+                    updateSettings({
+                      folderSortBy: value as typeof folderSortBy,
+                    })
+                  }
+                />
+              </div>
+              {folderSortBy !== "manual" && (
+                <div className="results-setting-control">
+                  <label htmlFor="folder-sort-direction">Order</label>
+                  <SettingsSelect
+                    id="folder-sort-direction"
+                    label="Folder sort order"
+                    value={folderSortDirection}
+                    theme={theme}
+                    options={[
+                      {
+                        value: "descending",
+                        label:
+                          folderSortBy === "percentage"
+                            ? "Highest first"
+                            : "Most first",
+                      },
+                      {
+                        value: "ascending",
+                        label:
+                          folderSortBy === "percentage"
+                            ? "Lowest first"
+                            : "Fewest first",
+                      },
+                    ]}
+                    onChange={(value) =>
+                      updateSettings({
+                        folderSortDirection:
+                          value as typeof folderSortDirection,
+                      })
+                    }
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -706,10 +874,13 @@ function App() {
         )}
         {activeResultsTab === "folders" && (
           <FolderResults
-            folders={orderedFolders}
+            folders={displayedFolders}
             selectedFolders={selectedFolders}
             onSelectedFoldersChange={setSelectedFolders}
             onMoveFolder={moveFolder}
+            onMoveFolderToEdge={moveFolderToEdge}
+            onRevealFolder={(path) => void revealInExplorer(path)}
+            showManualOrder={folderSortBy === "manual"}
           />
         )}
         {activeResultsTab === "results" && (

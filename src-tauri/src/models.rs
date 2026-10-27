@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 pub struct DuplicateFile {
@@ -21,6 +22,7 @@ pub struct ScanResult {
     pub groups: Vec<DuplicateGroup>,
     pub total_files: usize,
     pub total_size: u64,
+    pub folder_file_counts: HashMap<String, usize>,
 }
 
 /// A file from a previous scan; its hash is re-checked before any change is made.

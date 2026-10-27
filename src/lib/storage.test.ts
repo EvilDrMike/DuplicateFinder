@@ -4,6 +4,7 @@ import {
   loadLocalSettings,
   loadSavedGroups,
   parseSettings,
+  readNumberRecord,
   readPositiveNumber,
   storageKeys,
 } from "./storage";
@@ -42,6 +43,15 @@ describe("parseSettings", () => {
 describe("loadLocalSettings", () => {
   it("returns defaults when nothing is saved", () => {
     expect(loadLocalSettings()).toEqual(defaultSettings);
+  });
+
+  it("loads valid folder sort preferences", () => {
+    expect(
+      parseSettings({
+        folderSortBy: "files",
+        folderSortDirection: "ascending",
+      }),
+    ).toEqual({ folderSortBy: "files", folderSortDirection: "ascending" });
   });
 
   it("migrates legacy keys and lets the combined settings win", () => {
@@ -90,5 +100,23 @@ describe("readPositiveNumber", () => {
     expect(readPositiveNumber(storageKeys.totalFiles)).toBe(0);
     window.localStorage.setItem(storageKeys.totalFiles, "42");
     expect(readPositiveNumber(storageKeys.totalFiles)).toBe(42);
+  });
+});
+
+describe("readNumberRecord", () => {
+  it("returns valid non-negative folder counts and rejects invalid values", () => {
+    window.localStorage.setItem(
+      "duplicate-finder.folder-file-counts",
+      JSON.stringify({
+        "C:\\valid": 4,
+        "C:\\zero": 0,
+        "C:\\negative": -1,
+        "C:\\string": "3",
+      }),
+    );
+    expect(readNumberRecord(storageKeys.folderFileCounts)).toEqual({
+      "C:\\valid": 4,
+      "C:\\zero": 0,
+    });
   });
 });

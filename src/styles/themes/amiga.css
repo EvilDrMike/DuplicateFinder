@@ -270,11 +270,6 @@
   cursor: not-allowed;
   opacity: 1;
 }
-[data-theme="amiga"] .app-shell .duplicate-group.delete-all-selected {
-  border-color: var(--amiga-black) !important;
-  outline: 2px dashed var(--amiga-black);
-  outline-offset: -6px;
-}
 [data-theme="amiga"] .app-shell .about-backdrop {
   background-color: rgba(170, 170, 170, 0.6) !important;
 }

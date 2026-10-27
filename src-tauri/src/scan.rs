@@ -20,12 +20,18 @@ pub fn scan_directory(
         .filter(|extension| !extension.is_empty())
         .collect();
     let mut files_by_size: HashMap<u64, Vec<DuplicateFile>> = HashMap::new();
+    let mut folder_file_counts = HashMap::new();
     for path in paths {
         let root = Path::new(&path);
         if !root.is_dir() {
             return Err(format!("Not a directory: {path}"));
         }
-        collect_files(root, &extensions, &mut files_by_size);
+        collect_files(
+            root,
+            &extensions,
+            &mut files_by_size,
+            &mut folder_file_counts,
+        );
     }
 
     let total_files = files_by_size.values().map(Vec::len).sum();
@@ -43,6 +49,7 @@ pub fn scan_directory(
         groups,
         total_files,
         total_size,
+        folder_file_counts,
     })
 }
 
@@ -121,6 +128,7 @@ fn collect_files(
     directory: &Path,
     extensions: &[String],
     files_by_size: &mut HashMap<u64, Vec<DuplicateFile>>,
+    folder_file_counts: &mut HashMap<String, usize>,
 ) {
     let Ok(entries) = fs::read_dir(directory) else {
         return;
@@ -128,7 +136,7 @@ fn collect_files(
     for entry in entries.flatten() {
         let path = entry.path();
         if path.is_dir() {
-            collect_files(&path, extensions, files_by_size);
+            collect_files(&path, extensions, files_by_size, folder_file_counts);
             continue;
         }
         if !has_allowed_extension(&path, extensions) {
@@ -137,6 +145,11 @@ fn collect_files(
         let Ok(metadata) = entry.metadata() else {
             continue;
         };
+        if let Some(parent) = path.parent() {
+            *folder_file_counts
+                .entry(parent.to_string_lossy().to_string())
+                .or_default() += 1;
+        }
         files_by_size
             .entry(metadata.len())
             .or_default()
@@ -191,6 +204,7 @@ mod tests {
         fs::create_dir_all(root.join("b")).unwrap();
         fs::write(root.join("a/photo.jpg"), "same bytes").unwrap();
         fs::write(root.join("b/copy.JPG"), "same bytes").unwrap();
+        fs::write(root.join("b/single.jpg"), "unique bytes here").unwrap();
         fs::write(root.join("b/notes.txt"), "same bytes").unwrap();
 
         let result = scan_directory(
@@ -200,7 +214,19 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(result.total_files, 2);
+        assert_eq!(result.total_files, 3);
+        assert_eq!(
+            result
+                .folder_file_counts
+                .get(&root.join("a").to_string_lossy().to_string()),
+            Some(&1)
+        );
+        assert_eq!(
+            result
+                .folder_file_counts
+                .get(&root.join("b").to_string_lossy().to_string()),
+            Some(&2)
+        );
         assert_eq!(result.groups.len(), 1);
         assert_eq!(result.groups[0].files.len(), 2);
         fs::remove_dir_all(root).unwrap();

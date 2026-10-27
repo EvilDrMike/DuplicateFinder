@@ -11,7 +11,7 @@ type ScanPanelProps = {
   onAddFolder: (folder: string) => void;
   onBrowse: () => void;
   onRemoveFolder: (folder: string) => void;
-  onClearAll: () => void;
+  onClearFolders: () => void;
   fileExtensions: string;
   onFileExtensionsChange: (value: string) => void;
   activeFilterPresets: string[];
@@ -32,7 +32,7 @@ export function ScanPanel({
   onAddFolder,
   onBrowse,
   onRemoveFolder,
-  onClearAll,
+  onClearFolders,
   fileExtensions,
   onFileExtensionsChange,
   activeFilterPresets,
@@ -52,9 +52,9 @@ export function ScanPanel({
     setFolderInput("");
   }
 
-  function clearAll() {
+  function clearFolders() {
     setFolderInput("");
-    onClearAll();
+    onClearFolders();
   }
 
   return (
@@ -82,10 +82,10 @@ export function ScanPanel({
             <div className="folder-actions">
               <button
                 className="clear-folders-button"
-                onClick={clearAll}
+                onClick={clearFolders}
                 disabled={!folders.length || isScanning}
                 type="button">
-                Clear all
+                Clear folders
               </button>
               <button
                 className="browse-button"
@@ -125,7 +125,6 @@ export function ScanPanel({
             ) : (
               folders.map((folder) => (
                 <div className="folder-item" key={folder}>
-                  <span className="folder-symbol">/</span>
                   <span className="folder-name" title={folder}>
                     {folder}
                   </span>

@@ -917,9 +917,14 @@ input::placeholder {
 .results-settings {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 14px;
 }
-.results-settings label {
+.results-setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.results-setting-control label {
   color: #89918a;
   font:
     10px "DM Mono",
@@ -955,6 +960,13 @@ h2 {
   display: grid;
   gap: 8px;
 }
+.folder-sort-note {
+  margin: 0 0 4px;
+  color: #89918a;
+  font:
+    10px "DM Mono",
+    monospace;
+}
 .folder-select-all {
   display: inline-flex;
   align-items: center;
@@ -974,7 +986,7 @@ h2 {
 }
 .duplicate-folder {
   display: grid;
-  grid-template-columns: 22px 24px minmax(0, 1fr) auto auto;
+  grid-template-columns: 22px 26px minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
   min-width: 0;
@@ -1011,6 +1023,14 @@ h2 {
   font:
     10px "DM Mono",
     monospace;
+  white-space: nowrap;
+}
+.duplicate-folder-percentage {
+  color: #536158;
+  font:
+    10px "DM Mono",
+    monospace;
+  font-weight: 700;
   white-space: nowrap;
 }
 .folder-reorder-controls {
@@ -1503,6 +1523,42 @@ h2 {
   }
 }
 @media (max-width: 680px) {
+  .duplicate-folder {
+    grid-template-columns: 22px 26px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px;
+  }
+  .duplicate-folder .folder-select-control {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .duplicate-folder > .reveal-button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .duplicate-folder .duplicate-folder-path {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .duplicate-folder .duplicate-folder-count {
+    grid-column: 3 / -1;
+    grid-row: 2;
+    white-space: normal;
+  }
+  .duplicate-folder .duplicate-folder-percentage {
+    grid-column: 3 / -1;
+    grid-row: 3;
+  }
+  .duplicate-folder .folder-reorder-controls {
+    grid-column: 4;
+    grid-row: 1;
+    gap: 2px;
+  }
+  .duplicate-folder .folder-reorder-controls button {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
   .app-shell {
     padding: 20px 18px 40px;
   }
@@ -1573,8 +1629,11 @@ h2 {
     margin-top: 10px;
   }
   .results-settings {
-    align-items: flex-end;
+    align-items: stretch;
     flex-direction: column;
+  }
+  .results-setting-control {
+    justify-content: space-between;
   }
   .move-destination-row {
     align-items: stretch;

@@ -3,7 +3,7 @@ import type { DuplicateGroup } from "./types";
 export const uiThemes = [
   {
     id: "classic",
-    name: "Classic",
+    name: "Default",
     description: "The original warm, muted DuplicateFinder look.",
   },
   {

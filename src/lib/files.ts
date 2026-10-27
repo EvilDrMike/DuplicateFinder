@@ -2,8 +2,11 @@ import type {
   DuplicateFile,
   DuplicateFolder,
   DuplicateGroup,
+  FolderSortBy,
   FileInput,
+  GroupSortBy,
   MoveCandidateFile,
+  SortDirection,
 } from "../types";
 
 export function isImageFile(file: Pick<DuplicateFile, "name">) {
@@ -54,8 +57,57 @@ export function toMoveCandidate(
   return { ...file, expectedHash: expectedHash(file, group) };
 }
 
+function groupSortValue(
+  group: DuplicateGroup,
+  sortBy: GroupSortBy,
+  keptFiles: Record<string, string>,
+): number | string {
+  switch (sortBy) {
+    case "reclaimable": {
+      const keptPath = keptFiles[group.hash] ?? group.files[0]?.path;
+      return group.files
+        .filter((file) => file.path !== keptPath)
+        .reduce((total, file) => total + file.size, 0);
+    }
+    case "copies":
+      return group.files.length;
+    case "name":
+      return group.files[0]?.name ?? "";
+    case "size":
+      return group.files.reduce((total, file) => total + file.size, 0);
+  }
+}
+
+export function sortDuplicateGroups(
+  groups: DuplicateGroup[],
+  sortBy: GroupSortBy,
+  direction: SortDirection,
+  keptFiles: Record<string, string>,
+) {
+  const directionMultiplier = direction === "ascending" ? 1 : -1;
+  return [...groups].sort((left, right) => {
+    const leftValue = groupSortValue(left, sortBy, keptFiles);
+    const rightValue = groupSortValue(right, sortBy, keptFiles);
+    const comparison =
+      typeof leftValue === "string" && typeof rightValue === "string"
+        ? leftValue.localeCompare(rightValue, undefined, {
+            sensitivity: "base",
+          })
+        : Number(leftValue) - Number(rightValue);
+    if (comparison !== 0) return comparison * directionMultiplier;
+    return (
+      (left.files[0]?.name ?? "").localeCompare(
+        right.files[0]?.name ?? "",
+        undefined,
+        { sensitivity: "base" },
+      ) || left.hash.localeCompare(right.hash)
+    );
+  });
+}
+
 export function summarizeDuplicateFolders(
   groups: DuplicateGroup[],
+  folderFileCounts: Record<string, number> = {},
 ): DuplicateFolder[] {
   const folderMap = new Map<string, { groups: Set<string>; files: number }>();
   groups.forEach((group) => {
@@ -75,8 +127,45 @@ export function summarizeDuplicateFolders(
       path,
       groupCount: summary.groups.size,
       fileCount: summary.files,
+      scannedFileCount:
+        typeof folderFileCounts[path] === "number"
+          ? folderFileCounts[path]
+          : null,
+      duplicatePercentage:
+        typeof folderFileCounts[path] === "number" && folderFileCounts[path] > 0
+          ? (summary.files / folderFileCounts[path]) * 100
+          : null,
     }))
     .sort((left, right) => left.path.localeCompare(right.path));
+}
+
+export function sortDuplicateFolders(
+  folders: DuplicateFolder[],
+  sortBy: Exclude<FolderSortBy, "manual">,
+  direction: SortDirection,
+) {
+  const directionMultiplier = direction === "ascending" ? 1 : -1;
+  return [...folders].sort((left, right) => {
+    if (sortBy === "percentage") {
+      const leftPercentage = left.duplicatePercentage;
+      const rightPercentage = right.duplicatePercentage;
+      if (leftPercentage === null || rightPercentage === null) {
+        if (leftPercentage !== rightPercentage) {
+          return leftPercentage === null ? 1 : -1;
+        }
+      } else {
+        const difference = leftPercentage - rightPercentage;
+        if (difference !== 0) return difference * directionMultiplier;
+      }
+    } else {
+      const countKey = sortBy === "files" ? "fileCount" : "groupCount";
+      const countDifference = left[countKey] - right[countKey];
+      if (countDifference !== 0) return countDifference * directionMultiplier;
+    }
+    return left.path.localeCompare(right.path, undefined, {
+      sensitivity: "base",
+    });
+  });
 }
 
 /** Applies the user's custom order, appending any folders not yet ordered. */
